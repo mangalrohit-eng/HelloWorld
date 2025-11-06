@@ -25,6 +25,7 @@ function createDefaultRules() {
             {
                 id: Date.now() + 1,
                 name: 'Low Utilization - Under 20%',
+                type: 'include',
                 condition: 'utilization',
                 operator: '<',
                 value: 20,
@@ -33,6 +34,7 @@ function createDefaultRules() {
             {
                 id: Date.now() + 2,
                 name: 'Very Old Circuit - Over 48 Months',
+                type: 'include',
                 condition: 'age',
                 operator: '>',
                 value: 48,
@@ -41,6 +43,7 @@ function createDefaultRules() {
             {
                 id: Date.now() + 3,
                 name: 'High Cost per Mbps',
+                type: 'include',
                 condition: 'cost',
                 operator: '>',
                 value: 15,
@@ -49,6 +52,7 @@ function createDefaultRules() {
             {
                 id: Date.now() + 4,
                 name: 'Minimal Traffic Volume',
+                type: 'include',
                 condition: 'traffic',
                 operator: '<',
                 value: 50,
@@ -57,6 +61,7 @@ function createDefaultRules() {
             {
                 id: Date.now() + 5,
                 name: 'Extremely Low Utilization - Under 10%',
+                type: 'include',
                 condition: 'utilization',
                 operator: '<',
                 value: 10,
@@ -95,9 +100,12 @@ function initializeRuleForm() {
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
+        const ruleType = document.querySelector('input[name="ruleType"]:checked').value;
+        
         const rule = {
             id: Date.now(),
             name: document.getElementById('ruleName').value,
+            type: ruleType, // 'include' or 'exclude'
             condition: document.getElementById('ruleCondition').value,
             operator: document.getElementById('ruleOperator').value,
             value: parseFloat(document.getElementById('ruleValue').value),
@@ -123,18 +131,28 @@ function renderRules() {
         return;
     }
     
-    rulesList.innerHTML = rules.map(rule => `
-        <div class="rule-item">
-            <div class="rule-header">
-                <div class="rule-name">${rule.name}</div>
-                <button class="btn btn-danger" onclick="deleteRule(${rule.id})">Delete</button>
+    rulesList.innerHTML = rules.map(rule => {
+        const ruleType = rule.type || 'include'; // Default to 'include' for legacy rules
+        const typeLabel = ruleType === 'include' ? 'Include for Decommission' : 'Exclude from Decommission';
+        const typeClass = ruleType === 'include' ? 'rule-type-include' : 'rule-type-exclude';
+        const typeIcon = ruleType === 'include' ? '✓' : '✗';
+        
+        return `
+            <div class="rule-item">
+                <div class="rule-header">
+                    <div>
+                        <div class="rule-name">${rule.name}</div>
+                        <span class="rule-type-badge ${typeClass}">${typeIcon} ${typeLabel}</span>
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteRule(${rule.id})">Delete</button>
+                </div>
+                <div class="rule-condition">
+                    <strong>Condition:</strong> ${getConditionLabel(rule.condition)} ${rule.operator} ${rule.value}
+                </div>
+                ${rule.description ? `<div class="rule-description">${rule.description}</div>` : ''}
             </div>
-            <div class="rule-condition">
-                <strong>Condition:</strong> ${getConditionLabel(rule.condition)} ${rule.operator} ${rule.value}
-            </div>
-            ${rule.description ? `<div class="rule-description">${rule.description}</div>` : ''}
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Delete Rule
@@ -325,10 +343,22 @@ function runAgent2() {
             
             // Actually apply rules
             circuits.forEach(circuit => {
-                rules.forEach(rule => {
+                // First apply include rules
+                const includeRules = rules.filter(r => (r.type || 'include') === 'include');
+                includeRules.forEach(rule => {
                     if (evaluateRule(circuit, rule)) {
                         circuit.flagged = true;
                         circuit.matchedRules.push(rule.name);
+                    }
+                });
+                
+                // Then apply exclude rules (these override include rules)
+                const excludeRules = rules.filter(r => r.type === 'exclude');
+                excludeRules.forEach(rule => {
+                    if (evaluateRule(circuit, rule)) {
+                        circuit.flagged = false; // Unflag if it matches an exclude rule
+                        circuit.matchedRules = circuit.matchedRules.filter(r => r !== rule.name);
+                        circuit.matchedRules.push(`[EXCLUDED] ${rule.name}`);
                     }
                 });
             });
