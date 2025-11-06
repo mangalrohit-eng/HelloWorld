@@ -940,7 +940,69 @@ function sendForDecommission() {
     
     const circuitIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-circuit-id'));
     
-    // Update circuit statuses
+    // Start decommission workflow using footer bar
+    startDecommissionWorkflow(circuitIds);
+}
+
+// Decommission Workflow using Footer Bar
+function startDecommissionWorkflow(circuitIds) {
+    const footer = document.getElementById('learningFooter');
+    footer.classList.add('active');
+    
+    // Reset all agents
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById(`learningAgent${i}`).classList.remove('working', 'completed');
+        document.getElementById(`learningStatus${i}`).textContent = 'Waiting...';
+    }
+    document.getElementById('learningProgressBar').style.width = '0%';
+    
+    // Start agent sequence
+    setTimeout(() => runDecommissionAgent1(circuitIds), 300);
+}
+
+function runDecommissionAgent1(circuitIds) {
+    const agent = document.getElementById('learningAgent1');
+    const status = document.getElementById('learningStatus1');
+    
+    agent.classList.add('working');
+    status.textContent = 'Collection Agent gathering circuits...';
+    document.getElementById('learningProgressBar').style.width = '10%';
+    
+    setTimeout(() => {
+        status.textContent = `AI Agent collected ${circuitIds.length} circuits`;
+        agent.classList.remove('working');
+        agent.classList.add('completed');
+        document.getElementById('learningProgressBar').style.width = '25%';
+        setTimeout(() => runDecommissionAgent2(circuitIds), 400);
+    }, 1200);
+}
+
+function runDecommissionAgent2(circuitIds) {
+    const agent = document.getElementById('learningAgent2');
+    const status = document.getElementById('learningStatus2');
+    
+    agent.classList.add('working');
+    status.textContent = 'Validation Agent verifying circuits...';
+    document.getElementById('learningProgressBar').style.width = '35%';
+    
+    setTimeout(() => {
+        status.textContent = `AI Agent validated ${circuitIds.length} circuits`;
+        agent.classList.remove('working');
+        agent.classList.add('completed');
+        document.getElementById('learningProgressBar').style.width = '50%';
+        setTimeout(() => runDecommissionAgent3(circuitIds), 400);
+    }, 1500);
+}
+
+function runDecommissionAgent3(circuitIds) {
+    const agent = document.getElementById('learningAgent3');
+    const status = document.getElementById('learningStatus3');
+    
+    agent.classList.add('working');
+    status.textContent = 'API Agent sending to decommission API...';
+    document.getElementById('learningProgressBar').style.width = '60%';
+    
+    // Actually update circuit statuses
     circuitIds.forEach(id => {
         const circuit = circuits.find(c => c.id === id);
         if (circuit) {
@@ -950,10 +1012,41 @@ function sendForDecommission() {
     });
     
     saveData();
+    
+    setTimeout(() => {
+        status.textContent = `AI Agent sent ${circuitIds.length} to API`;
+        agent.classList.remove('working');
+        agent.classList.add('completed');
+        document.getElementById('learningProgressBar').style.width = '75%';
+        setTimeout(() => runDecommissionAgent4(circuitIds), 400);
+    }, 1800);
+}
+
+function runDecommissionAgent4(circuitIds) {
+    const agent = document.getElementById('learningAgent4');
+    const status = document.getElementById('learningStatus4');
+    
+    agent.classList.add('working');
+    status.textContent = 'Confirmation Agent verifying status...';
+    document.getElementById('learningProgressBar').style.width = '85%';
+    
+    // Update UI
     renderDecommissionList();
     updateAnalytics();
     
-    showNotification(`${circuitIds.length} circuit(s) sent for decommission!`);
+    setTimeout(() => {
+        status.textContent = 'AI Agent confirmed circuits in process';
+        agent.classList.remove('working');
+        agent.classList.add('completed');
+        document.getElementById('learningProgressBar').style.width = '100%';
+        
+        showNotification(`${circuitIds.length} circuit(s) successfully sent for decommission!`);
+        
+        // Hide footer after a delay
+        setTimeout(() => {
+            document.getElementById('learningFooter').classList.remove('active');
+        }, 2000);
+    }, 1200);
 }
 
 // Update Decommission Stats
