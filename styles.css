@@ -2903,36 +2903,43 @@ textarea {
 
     /* AI Agent Footer - Mobile */
     .learning-footer {
-        padding: 12px 10px;
-        bottom: -100px; /* Ensure it stays hidden by default on mobile */
+        padding: 8px 10px;
+        bottom: -100% !important; /* Ensure it stays hidden by default on mobile */
+        max-height: 25vh;
+        overflow-y: auto;
     }
 
     .learning-footer.active {
-        bottom: 0; /* Show when active */
+        bottom: 0 !important; /* Show when active */
     }
 
     .learning-agents {
         flex-direction: column;
-        gap: 10px;
+        gap: 6px;
     }
 
     .learning-agent {
-        flex-direction: column;
-        text-align: center;
-        padding: 12px;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        text-align: left;
+        padding: 6px 10px;
+        gap: 8px;
     }
 
     .agent-icon-small {
-        font-size: 1.8rem;
+        font-size: 1.2rem;
+        flex-shrink: 0;
     }
 
     .agent-text-small {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
+        line-height: 1.2;
     }
 
     .agent-status-text {
-        font-size: 0.75rem;
-        margin-top: 4px;
+        font-size: 0.65rem;
+        margin-top: 2px;
     }
 
     .agent-arrow-small {
@@ -2940,7 +2947,8 @@ textarea {
     }
 
     .learning-progress {
-        margin-top: 12px;
+        margin-top: 8px;
+        height: 3px;
     }
 }
 
