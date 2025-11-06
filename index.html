@@ -33,9 +33,18 @@
                 <p>Define rules to identify circuits eligible for decommissioning</p>
             </div>
 
-            <div class="card">
-                <h3>Add New Rule</h3>
-                <form id="ruleForm">
+            <!-- Sub-tabs for Decom Criteria -->
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" data-subtab="newRule">➕ Create New Rule</button>
+                <button class="sub-tab-btn" data-subtab="activeRules">📋 Active Rules</button>
+                <button class="sub-tab-btn" data-subtab="aiRules">🤖 AI Generated Rules</button>
+            </div>
+
+            <!-- Sub-tab: Create New Rule -->
+            <div id="newRule" class="sub-tab-content active">
+                <div class="card">
+                    <h3>Add New Rule</h3>
+                    <form id="ruleForm">
                     <div class="form-group">
                         <label for="ruleName">Rule Name *</label>
                         <input type="text" id="ruleName" required placeholder="e.g., Low Utilization Rule">
@@ -143,16 +152,22 @@
                     <button type="submit" class="btn btn-primary">Add Rule</button>
                 </form>
             </div>
+            </div>
 
-            <div class="card">
-                <h3>Active Rules</h3>
-                <div id="rulesList" class="rules-list">
-                    <!-- Rules will be populated here -->
+            <!-- Sub-tab: Active Rules -->
+            <div id="activeRules" class="sub-tab-content">
+                <div class="card">
+                    <h3>Active Rules</h3>
+                    <div id="rulesList" class="rules-list">
+                        <!-- Rules will be populated here -->
+                    </div>
                 </div>
             </div>
 
-            <div class="card" style="background: #FFF5F5; border-left: 4px solid #CD040B;">
-                <h3>🤖 AI-Powered Rule Learning</h3>
+            <!-- Sub-tab: AI Generated Rules -->
+            <div id="aiRules" class="sub-tab-content">
+                <div class="card" style="background: #FFF5F5; border-left: 4px solid #CD040B;">
+                    <h3>🤖 AI-Powered Rule Learning</h3>
                 <p style="color: #666666; margin-bottom: 20px;">Analyze engineer feedback to automatically create exclusion rules from "Keep Active" comments</p>
                 <div style="display: flex; gap: 15px; align-items: center;">
                     <button class="btn btn-secondary" onclick="learnFromFeedback()">
@@ -166,6 +181,7 @@
                     <h4 style="color: #CD040B; font-size: 1.1rem; margin-bottom: 10px;">✨ AI-Generated Rules:</h4>
                     <div id="suggestedRulesList"></div>
                 </div>
+            </div>
             </div>
         </section>
 

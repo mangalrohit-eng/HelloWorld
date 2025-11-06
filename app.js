@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadData();
     createDefaultRules();
     initializeTabs();
+    initializeSubTabs();
     initializeRuleForm();
     renderRules();
     generateSampleCircuits();
@@ -111,6 +112,25 @@ function initializeTabs() {
             // Add active class to clicked button and corresponding content
             this.classList.add('active');
             document.getElementById(targetTab).classList.add('active');
+        });
+    });
+}
+
+// Sub-tab Navigation
+function initializeSubTabs() {
+    const subTabButtons = document.querySelectorAll('.sub-tab-btn');
+    
+    subTabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetSubTab = this.getAttribute('data-subtab');
+            
+            // Remove active class from all sub-tabs and content
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.sub-tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked button and corresponding content
+            this.classList.add('active');
+            document.getElementById(targetSubTab).classList.add('active');
         });
     });
 }
