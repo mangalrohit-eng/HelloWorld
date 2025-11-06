@@ -281,67 +281,57 @@ function generateSampleCircuits() {
     saveData();
 }
 
-// Run Analysis with AI Agents
+// Run Analysis with AI Agents using Footer Bar
 function runAnalysis() {
     if (rules.length === 0) {
         alert('Please add at least one rule before running analysis.');
         return;
     }
     
-    // Show agents modal
-    showAgentsModal();
+    // Start analysis workflow using footer bar
+    startAnalysisWorkflow();
 }
 
-// Show AI Agents Modal
-function showAgentsModal() {
-    const modal = document.getElementById('agentsModal');
-    modal.classList.add('active');
+// Analysis Workflow using Footer Bar
+function startAnalysisWorkflow() {
+    const footer = document.getElementById('learningFooter');
+    footer.classList.add('active');
     
     // Reset all agents
     for (let i = 1; i <= 4; i++) {
-        const agent = document.getElementById(`agent${i}`);
-        agent.classList.remove('working', 'completed');
-        document.getElementById(`progress${i}`).style.width = '0%';
-        document.getElementById(`progress-text${i}`).textContent = i === 1 ? 'Initializing...' : 'Waiting...';
+        document.getElementById(`learningAgent${i}`).classList.remove('working', 'completed');
+        document.getElementById(`learningStatus${i}`).textContent = 'Waiting...';
     }
-    document.getElementById('agentsSummary').style.display = 'none';
+    document.getElementById('learningProgressBar').style.width = '0%';
     
     // Start agent sequence
-    setTimeout(() => runAgent1(), 500);
+    setTimeout(() => runAnalysisAgent1(), 300);
 }
 
-// Agent 1: Data Retrieval
-function runAgent1() {
-    const agent1 = document.getElementById('agent1');
-    agent1.classList.add('working');
+function runAnalysisAgent1() {
+    const agent = document.getElementById('learningAgent1');
+    const status = document.getElementById('learningStatus1');
     
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += 5;
-        document.getElementById('progress1').style.width = progress + '%';
-        
-        if (progress === 30) {
-            document.getElementById('progress-text1').textContent = `Fetching circuits...`;
-        } else if (progress === 60) {
-            document.getElementById('progress-text1').textContent = `Loading ${circuits.length} circuits`;
-        } else if (progress === 90) {
-            document.getElementById('progress-text1').textContent = 'Data retrieved!';
-        }
-        
-        if (progress >= 100) {
-            clearInterval(interval);
-            agent1.classList.remove('working');
-            agent1.classList.add('completed');
-            document.getElementById('progress-text1').textContent = `✓ ${circuits.length} circuits loaded`;
-            setTimeout(() => runAgent2(), 500);
-        }
-    }, 80);
+    agent.classList.add('working');
+    status.textContent = 'Fetching circuits...';
+    document.getElementById('learningProgressBar').style.width = '10%';
+    
+    setTimeout(() => {
+        status.textContent = `${circuits.length} circuits loaded`;
+        agent.classList.remove('working');
+        agent.classList.add('completed');
+        document.getElementById('learningProgressBar').style.width = '25%';
+        setTimeout(() => runAnalysisAgent2(), 400);
+    }, 1200);
 }
 
-// Agent 2: Rules Engine
-function runAgent2() {
-    const agent2 = document.getElementById('agent2');
-    agent2.classList.add('working');
+function runAnalysisAgent2() {
+    const agent = document.getElementById('learningAgent2');
+    const status = document.getElementById('learningStatus2');
+    
+    agent.classList.add('working');
+    status.textContent = 'Applying rules...';
+    document.getElementById('learningProgressBar').style.width = '35%';
     
     // Reset all circuits
     circuits.forEach(circuit => {
@@ -349,138 +339,86 @@ function runAgent2() {
         circuit.matchedRules = [];
     });
     
-    let progress = 0;
-    let processedRules = 0;
-    const interval = setInterval(() => {
-        progress += 5;
-        document.getElementById('progress2').style.width = progress + '%';
+    // Actually apply rules
+    circuits.forEach(circuit => {
+        // First apply include rules
+        const includeRules = rules.filter(r => (r.type || 'include') === 'include');
+        includeRules.forEach(rule => {
+            if (evaluateRule(circuit, rule)) {
+                circuit.flagged = true;
+                circuit.matchedRules.push(rule.name);
+            }
+        });
         
-        if (progress <= 90) {
-            processedRules = Math.floor((progress / 100) * rules.length);
-            document.getElementById('progress-text2').textContent = `Applying rule ${Math.min(processedRules + 1, rules.length)} of ${rules.length}`;
-        } else {
-            document.getElementById('progress-text2').textContent = 'Rules applied!';
-        }
-        
-        if (progress >= 100) {
-            clearInterval(interval);
-            
-            // Actually apply rules
-            circuits.forEach(circuit => {
-                // First apply include rules
-                const includeRules = rules.filter(r => (r.type || 'include') === 'include');
-                includeRules.forEach(rule => {
-                    if (evaluateRule(circuit, rule)) {
-                        circuit.flagged = true;
-                        circuit.matchedRules.push(rule.name);
-                    }
-                });
-                
-                // Then apply exclude rules (these override include rules)
-                const excludeRules = rules.filter(r => r.type === 'exclude');
-                excludeRules.forEach(rule => {
-                    if (evaluateRule(circuit, rule)) {
-                        circuit.flagged = false; // Unflag if it matches an exclude rule
-                        circuit.matchedRules = circuit.matchedRules.filter(r => r !== rule.name);
-                        circuit.matchedRules.push(`[EXCLUDED] ${rule.name}`);
-                    }
-                });
-            });
-            
-            const flaggedCount = circuits.filter(c => c.flagged).length;
-            agent2.classList.remove('working');
-            agent2.classList.add('completed');
-            document.getElementById('progress-text2').textContent = `✓ ${flaggedCount} circuits flagged`;
-            setTimeout(() => runAgent3(), 500);
-        }
-    }, 70);
+        // Then apply exclude rules (these override include rules)
+        const excludeRules = rules.filter(r => r.type === 'exclude');
+        excludeRules.forEach(rule => {
+            if (evaluateRule(circuit, rule)) {
+                circuit.flagged = false; // Unflag if it matches an exclude rule
+                circuit.matchedRules = circuit.matchedRules.filter(r => r !== rule.name);
+                circuit.matchedRules.push(`[EXCLUDED] ${rule.name}`);
+            }
+        });
+    });
+    
+    const flaggedCount = circuits.filter(c => c.flagged).length;
+    
+    setTimeout(() => {
+        status.textContent = `${flaggedCount} circuits flagged`;
+        agent.classList.remove('working');
+        agent.classList.add('completed');
+        document.getElementById('learningProgressBar').style.width = '50%';
+        setTimeout(() => runAnalysisAgent3(), 400);
+    }, 1500);
 }
 
-// Agent 3: Validation
-function runAgent3() {
-    const agent3 = document.getElementById('agent3');
-    agent3.classList.add('working');
+function runAnalysisAgent3() {
+    const agent = document.getElementById('learningAgent3');
+    const status = document.getElementById('learningStatus3');
+    
+    agent.classList.add('working');
+    status.textContent = 'Validating results...';
+    document.getElementById('learningProgressBar').style.width = '60%';
     
     const flaggedCircuits = circuits.filter(c => c.flagged);
-    let progress = 0;
-    let validated = 0;
     
-    const interval = setInterval(() => {
-        progress += 5;
-        document.getElementById('progress3').style.width = progress + '%';
-        
-        if (progress <= 90) {
-            validated = Math.floor((progress / 100) * flaggedCircuits.length);
-            document.getElementById('progress-text3').textContent = `Validating ${Math.min(validated + 1, flaggedCircuits.length)} of ${flaggedCircuits.length}`;
-        } else {
-            document.getElementById('progress-text3').textContent = 'Validation complete!';
-        }
-        
-        if (progress >= 100) {
-            clearInterval(interval);
-            agent3.classList.remove('working');
-            agent3.classList.add('completed');
-            document.getElementById('progress-text3').textContent = `✓ ${flaggedCircuits.length} circuits validated`;
-            setTimeout(() => runAgent4(), 500);
-        }
-    }, 60);
-}
-
-// Agent 4: Output
-function runAgent4() {
-    const agent4 = document.getElementById('agent4');
-    agent4.classList.add('working');
-    
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += 5;
-        document.getElementById('progress4').style.width = progress + '%';
-        
-        if (progress === 40) {
-            document.getElementById('progress-text4').textContent = 'Preparing results...';
-        } else if (progress === 70) {
-            document.getElementById('progress-text4').textContent = 'Updating dashboard...';
-        } else if (progress === 90) {
-            document.getElementById('progress-text4').textContent = 'Finalizing...';
-        }
-        
-        if (progress >= 100) {
-            clearInterval(interval);
-            agent4.classList.remove('working');
-            agent4.classList.add('completed');
-            document.getElementById('progress-text4').textContent = '✓ Results delivered';
-            
-            // Save and update
-            saveData();
-            renderCircuits();
-            updateStats();
-            updateAnalytics();
-            
-            // Show summary
-            setTimeout(() => showAgentsSummary(), 500);
-        }
-    }, 50);
-}
-
-// Show Agents Summary
-function showAgentsSummary() {
-    const flaggedCount = circuits.filter(c => c.flagged).length;
-    const summaryText = document.getElementById('summaryText');
-    summaryText.textContent = `Analyzed ${circuits.length} circuits using ${rules.length} rules. Found ${flaggedCount} circuits eligible for decommission.`;
-    
-    document.getElementById('agentsSummary').style.display = 'block';
-    
-    // Auto-close modal after 3 seconds
     setTimeout(() => {
-        closeAgentsModal();
-        showNotification('Analysis completed!');
-    }, 3000);
+        status.textContent = `${flaggedCircuits.length} circuits validated`;
+        agent.classList.remove('working');
+        agent.classList.add('completed');
+        document.getElementById('learningProgressBar').style.width = '75%';
+        setTimeout(() => runAnalysisAgent4(), 400);
+    }, 1300);
 }
 
-// Close Agents Modal
-function closeAgentsModal() {
-    const modal = document.getElementById('agentsModal');
-    modal.classList.remove('active');
+function runAnalysisAgent4() {
+    const agent = document.getElementById('learningAgent4');
+    const status = document.getElementById('learningStatus4');
+    
+    agent.classList.add('working');
+    status.textContent = 'Updating dashboard...';
+    document.getElementById('learningProgressBar').style.width = '85%';
+    
+    // Save and update
+    saveData();
+    renderCircuits();
+    updateStats();
+    updateAnalytics();
+    
+    setTimeout(() => {
+        status.textContent = 'Analysis complete';
+        agent.classList.remove('working');
+        agent.classList.add('completed');
+        document.getElementById('learningProgressBar').style.width = '100%';
+        
+        const flaggedCount = circuits.filter(c => c.flagged).length;
+        showNotification(`Analysis completed! ${flaggedCount} circuits flagged for review`);
+        
+        // Hide footer after a delay
+        setTimeout(() => {
+            document.getElementById('learningFooter').classList.remove('active');
+        }, 2000);
+    }, 1200);
 }
 
 // Update Feedback Count
