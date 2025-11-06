@@ -625,11 +625,11 @@ function addLearnedRule(patternKey, name, description) {
     const rule = {
         id: Date.now(),
         name: name,
+        type: 'exclude', // Exclusion rule - prevents circuits from being flagged
         condition: 'tags', // Special condition for tag-based rules
         operator: 'excludes',
         value: patternKey,
         description: description,
-        isExclusion: true,
         aiGenerated: true
     };
     
@@ -638,7 +638,7 @@ function addLearnedRule(patternKey, name, description) {
     renderRules();
     updateAnalytics();
     
-    showNotification(`Rule "${name}" added successfully!`);
+    showNotification(`Exclusion rule "${name}" added successfully!`);
 }
 
 // Evaluate Rule
