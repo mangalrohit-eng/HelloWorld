@@ -499,14 +499,105 @@ function learnFromFeedback() {
         return;
     }
     
-    showNotification('AI analyzing engineer feedback...');
+    // Start AI learning workflow
+    startLearningWorkflow(rejectedCircuits);
+}
+
+// AI Learning Workflow
+function startLearningWorkflow(rejectedCircuits) {
+    const footer = document.getElementById('learningFooter');
+    footer.classList.add('active');
     
-    // Simulate AI processing delay
+    // Reset all agents
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById(`learningAgent${i}`).classList.remove('working', 'completed');
+        document.getElementById(`learningStatus${i}`).textContent = 'Waiting...';
+    }
+    document.getElementById('learningProgressBar').style.width = '0%';
+    
+    // Start agent sequence
+    setTimeout(() => runLearningAgent1(rejectedCircuits), 300);
+}
+
+function runLearningAgent1(rejectedCircuits) {
+    const agent = document.getElementById('learningAgent1');
+    const status = document.getElementById('learningStatus1');
+    
+    agent.classList.add('working');
+    status.textContent = 'Collecting feedback...';
+    document.getElementById('learningProgressBar').style.width = '10%';
+    
     setTimeout(() => {
-        const suggestedRules = analyzeRejectionReasons(rejectedCircuits);
-        displaySuggestedRules(suggestedRules);
-        showNotification(`AI generated ${suggestedRules.length} rule suggestions!`);
+        status.textContent = `Collected ${rejectedCircuits.length} rejections`;
+        agent.classList.remove('working');
+        agent.classList.add('completed');
+        document.getElementById('learningProgressBar').style.width = '25%';
+        setTimeout(() => runLearningAgent2(rejectedCircuits), 400);
+    }, 1200);
+}
+
+function runLearningAgent2(rejectedCircuits) {
+    const agent = document.getElementById('learningAgent2');
+    const status = document.getElementById('learningStatus2');
+    
+    agent.classList.add('working');
+    status.textContent = 'Analyzing patterns...';
+    document.getElementById('learningProgressBar').style.width = '35%';
+    
+    setTimeout(() => {
+        status.textContent = 'Patterns identified';
+        agent.classList.remove('working');
+        agent.classList.add('completed');
+        document.getElementById('learningProgressBar').style.width = '50%';
+        setTimeout(() => runLearningAgent3(rejectedCircuits), 400);
     }, 1500);
+}
+
+function runLearningAgent3(rejectedCircuits) {
+    const agent = document.getElementById('learningAgent3');
+    const status = document.getElementById('learningStatus3');
+    
+    agent.classList.add('working');
+    status.textContent = 'Generating rules...';
+    document.getElementById('learningProgressBar').style.width = '60%';
+    
+    // Actually analyze and generate rules
+    const suggestedRules = analyzeRejectionReasons(rejectedCircuits);
+    
+    setTimeout(() => {
+        status.textContent = `${suggestedRules.length} rules created`;
+        agent.classList.remove('working');
+        agent.classList.add('completed');
+        document.getElementById('learningProgressBar').style.width = '75%';
+        setTimeout(() => runLearningAgent4(suggestedRules), 400);
+    }, 1300);
+}
+
+function runLearningAgent4(suggestedRules) {
+    const agent = document.getElementById('learningAgent4');
+    const status = document.getElementById('learningStatus4');
+    
+    agent.classList.add('working');
+    status.textContent = 'Validating rules...';
+    document.getElementById('learningProgressBar').style.width = '85%';
+    
+    setTimeout(() => {
+        status.textContent = 'Validation complete';
+        agent.classList.remove('working');
+        agent.classList.add('completed');
+        document.getElementById('learningProgressBar').style.width = '100%';
+        
+        // Display results and hide footer
+        setTimeout(() => {
+            displaySuggestedRules(suggestedRules);
+            showNotification(`AI generated ${suggestedRules.length} exclusion rule suggestions!`);
+            
+            // Hide footer after a delay
+            setTimeout(() => {
+                document.getElementById('learningFooter').classList.remove('active');
+            }, 2000);
+        }, 800);
+    }, 1200);
 }
 
 // Analyze Rejection Reasons with AI

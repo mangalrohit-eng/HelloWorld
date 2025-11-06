@@ -1217,6 +1217,114 @@ textarea {
     animation: pulse 2s ease-in-out infinite;
 }
 
+/* Learning Footer Bar */
+.learning-footer {
+    position: fixed;
+    bottom: -100px;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+    border-top: 3px solid #CD040B;
+    padding: 15px 20px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 1500;
+    transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.learning-footer.active {
+    bottom: 0;
+}
+
+.learning-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.learning-agents {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.learning-agent {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.learning-agent.working {
+    background: rgba(205, 4, 11, 0.2);
+    border-color: #CD040B;
+    box-shadow: 0 0 15px rgba(205, 4, 11, 0.4);
+    animation: pulseFooter 1.5s ease-in-out infinite;
+}
+
+.learning-agent.completed {
+    background: rgba(46, 125, 50, 0.2);
+    border-color: #2E7D32;
+}
+
+@keyframes pulseFooter {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(205, 4, 11, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(205, 4, 11, 0.7);
+    }
+}
+
+.agent-icon-small {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.agent-arrow-small {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.agent-status-text {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-width: 120px;
+}
+
+.learning-agent.working .agent-status-text {
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+.learning-agent.completed .agent-status-text {
+    color: #81C784;
+}
+
+.learning-progress {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.learning-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #CD040B 0%, #FF0015 100%);
+    width: 0%;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px rgba(205, 4, 11, 0.5);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     body {
