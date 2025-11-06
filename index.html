@@ -107,6 +107,35 @@
                     </div>
 
                     <div class="form-group">
+                        <label>Compound Rule Logic</label>
+                        <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 15px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="ruleLogic" value="single" checked>
+                                <span>Single Condition</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="ruleLogic" value="AND">
+                                <span>Multiple Conditions (AND)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="ruleLogic" value="OR">
+                                <span>Multiple Conditions (OR)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="compoundConditions" style="display: none; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <label style="font-weight: 600; color: #000000;">Additional Conditions:</label>
+                            <button type="button" class="btn btn-secondary" onclick="addConditionToRule()" style="padding: 8px 16px;">
+                                ➕ Add Condition
+                            </button>
+                        </div>
+                        <div id="conditionsList" style="display: flex; flex-direction: column; gap: 10px;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label for="ruleDescription">Description</label>
                         <textarea id="ruleDescription" rows="3" placeholder="Describe when this rule should flag a circuit..."></textarea>
                     </div>

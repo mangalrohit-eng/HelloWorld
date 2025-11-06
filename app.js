@@ -93,12 +93,17 @@ function initializeTabs() {
     });
 }
 
+// Temporary storage for additional conditions
+let additionalConditions = [];
+
 // Rule Form Handling
 function initializeRuleForm() {
     const form = document.getElementById('ruleForm');
     const conditionSelect = document.getElementById('ruleCondition');
     const operatorSelect = document.getElementById('ruleOperator');
     const valueInputGroup = document.getElementById('valueInputGroup');
+    const logicRadios = document.querySelectorAll('input[name="ruleLogic"]');
+    const compoundSection = document.getElementById('compoundConditions');
     
     // Define condition types and their options
     const conditionConfig = {
@@ -207,10 +212,24 @@ function initializeRuleForm() {
         }
     });
     
+    // Handle logic radio change
+    logicRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'single') {
+                compoundSection.style.display = 'none';
+                additionalConditions = [];
+                renderAdditionalConditions();
+            } else {
+                compoundSection.style.display = 'block';
+            }
+        });
+    });
+    
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
         const ruleType = document.querySelector('input[name="ruleType"]:checked').value;
+        const ruleLogic = document.querySelector('input[name="ruleLogic"]:checked').value;
         const condition = document.getElementById('ruleCondition').value;
         const config = conditionConfig[condition];
         const valueElement = document.getElementById('ruleValue');
@@ -227,17 +246,35 @@ function initializeRuleForm() {
             id: Date.now(),
             name: document.getElementById('ruleName').value,
             type: ruleType, // 'include' or 'exclude'
-            condition: condition,
-            operator: document.getElementById('ruleOperator').value,
-            value: value,
             description: document.getElementById('ruleDescription').value
         };
+        
+        // Handle single vs compound rules
+        if (ruleLogic === 'single') {
+            rule.condition = condition;
+            rule.operator = document.getElementById('ruleOperator').value;
+            rule.value = value;
+        } else {
+            // Compound rule
+            const primaryCondition = {
+                condition: condition,
+                operator: document.getElementById('ruleOperator').value,
+                value: value
+            };
+            rule.conditions = [primaryCondition, ...additionalConditions];
+            rule.logic = ruleLogic; // 'AND' or 'OR'
+        }
         
         rules.push(rule);
         saveData();
         renderRules();
         updateAnalytics();
         form.reset();
+        
+        // Reset additional conditions
+        additionalConditions = [];
+        renderAdditionalConditions();
+        compoundSection.style.display = 'none';
         
         // Reset to default operators after form reset
         operatorSelect.innerHTML = `
@@ -258,6 +295,54 @@ function initializeRuleForm() {
     });
 }
 
+// Add condition to compound rule
+function addConditionToRule() {
+    // Create a simple prompt-based UI for now
+    const conditionType = prompt('Condition Type:\n1. utilization\n2. age\n3. service_type\n4. contract_status\n5. site_status\n6. hardware_eol\n\nEnter condition:');
+    if (!conditionType) return;
+    
+    const operator = prompt('Operator:\n==, !=, <, <=, >, >=\n\nEnter operator:');
+    if (!operator) return;
+    
+    const value = prompt('Enter value:');
+    if (!value) return;
+    
+    const condition = {
+        condition: conditionType,
+        operator: operator,
+        value: isNaN(value) ? value : parseFloat(value)
+    };
+    
+    additionalConditions.push(condition);
+    renderAdditionalConditions();
+}
+
+// Render additional conditions list
+function renderAdditionalConditions() {
+    const list = document.getElementById('conditionsList');
+    if (!list) return;
+    
+    if (additionalConditions.length === 0) {
+        list.innerHTML = '<div style="color: #666666; font-style: italic;">No additional conditions yet</div>';
+        return;
+    }
+    
+    list.innerHTML = additionalConditions.map((cond, index) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #F6F6F6; border-radius: 6px; border-left: 3px solid #CD040B;">
+            <span style="color: #000000; font-weight: 500;">
+                ${getConditionLabel(cond.condition)} ${cond.operator} ${cond.value}
+            </span>
+            <button type="button" onclick="removeCondition(${index})" style="background: none; border: none; color: #CD040B; cursor: pointer; font-size: 1.2rem;">✕</button>
+        </div>
+    `).join('');
+}
+
+// Remove condition from compound rule
+function removeCondition(index) {
+    additionalConditions.splice(index, 1);
+    renderAdditionalConditions();
+}
+
 // Render Rules
 function renderRules() {
     const rulesList = document.getElementById('rulesList');
@@ -273,6 +358,22 @@ function renderRules() {
         const typeClass = ruleType === 'include' ? 'rule-type-include' : 'rule-type-exclude';
         const typeIcon = ruleType === 'include' ? '✓' : '✗';
         
+        // Build condition display
+        let conditionHTML = '';
+        if (rule.conditions && rule.conditions.length > 0) {
+            // Compound rule
+            const logicLabel = rule.logic === 'AND' ? '<strong style="color: #CD040B;">AND</strong>' : '<strong style="color: #CD040B;">OR</strong>';
+            conditionHTML = '<strong>Conditions:</strong><div style="margin-top: 8px; padding-left: 12px; border-left: 3px solid #CD040B;">';
+            conditionHTML += rule.conditions.map((cond, idx) => {
+                const condLabel = getConditionLabel(cond.condition);
+                return `<div style="margin: 4px 0;">${idx > 0 ? logicLabel + ' ' : ''}${condLabel} ${cond.operator} ${cond.value}</div>`;
+            }).join('');
+            conditionHTML += '</div>';
+        } else {
+            // Single condition
+            conditionHTML = `<strong>Condition:</strong> ${getConditionLabel(rule.condition)} ${rule.operator} ${rule.value}`;
+        }
+        
         return `
             <div class="rule-item">
                 <div class="rule-header">
@@ -283,7 +384,7 @@ function renderRules() {
                     <button class="btn btn-danger" onclick="deleteRule(${rule.id})">Delete</button>
                 </div>
                 <div class="rule-condition">
-                    <strong>Condition:</strong> ${getConditionLabel(rule.condition)} ${rule.operator} ${rule.value}
+                    ${conditionHTML}
                 </div>
                 ${rule.description ? `<div class="rule-description">${rule.description}</div>` : ''}
             </div>
@@ -808,35 +909,60 @@ function addLearnedRule(patternKey, name, description) {
 
 // Evaluate Rule
 function evaluateRule(circuit, rule) {
-    const circuitValue = circuit[rule.condition];
-    const ruleValue = rule.value;
+    // Check if this is a compound rule
+    if (rule.conditions && rule.conditions.length > 0) {
+        return evaluateCompoundRule(circuit, rule);
+    }
+    
+    // Single condition rule
+    return evaluateSingleCondition(circuit, rule.condition, rule.operator, rule.value);
+}
+
+// Evaluate compound rule with AND/OR logic
+function evaluateCompoundRule(circuit, rule) {
+    const results = rule.conditions.map(cond => 
+        evaluateSingleCondition(circuit, cond.condition, cond.operator, cond.value)
+    );
+    
+    if (rule.logic === 'AND') {
+        return results.every(result => result === true);
+    } else if (rule.logic === 'OR') {
+        return results.some(result => result === true);
+    }
+    
+    return false;
+}
+
+// Evaluate a single condition
+function evaluateSingleCondition(circuit, condition, operator, value) {
+    const circuitValue = circuit[condition];
     
     // Handle text-based conditions
     const textBasedConditions = ['contract_status', 'service_type', 'redundancy', 'site_status', 'hardware_eol', 'provider_status'];
-    if (textBasedConditions.includes(rule.condition)) {
+    if (textBasedConditions.includes(condition)) {
         // For text conditions, only use equality/inequality
-        if (rule.operator === '==' || rule.operator === '=') {
-            return circuitValue === ruleValue;
-        } else if (rule.operator === '!=') {
-            return circuitValue !== ruleValue;
+        if (operator === '==' || operator === '=') {
+            return circuitValue === value;
+        } else if (operator === '!=') {
+            return circuitValue !== value;
         }
         return false;
     }
     
     // Handle numeric conditions
-    switch (rule.operator) {
+    switch (operator) {
         case '<':
-            return circuitValue < ruleValue;
+            return circuitValue < value;
         case '<=':
-            return circuitValue <= ruleValue;
+            return circuitValue <= value;
         case '>':
-            return circuitValue > ruleValue;
+            return circuitValue > value;
         case '>=':
-            return circuitValue >= ruleValue;
+            return circuitValue >= value;
         case '==':
-            return circuitValue == ruleValue;
+            return circuitValue == value;
         case '!=':
-            return circuitValue != ruleValue;
+            return circuitValue != value;
         default:
             return false;
     }
