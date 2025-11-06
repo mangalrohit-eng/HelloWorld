@@ -5,6 +5,7 @@ let circuits = [];
 // Initialize application
 document.addEventListener('DOMContentLoaded', function() {
     loadData();
+    createDefaultRules();
     initializeTabs();
     initializeRuleForm();
     renderRules();
@@ -15,6 +16,58 @@ document.addEventListener('DOMContentLoaded', function() {
     updateAnalytics();
     updateFeedbackCount();
 });
+
+// Create Default Rules
+function createDefaultRules() {
+    // Only create default rules if no rules exist
+    if (rules.length === 0) {
+        const defaultRules = [
+            {
+                id: Date.now() + 1,
+                name: 'Low Utilization - Under 20%',
+                condition: 'utilization',
+                operator: '<',
+                value: 20,
+                description: 'Circuits with utilization below 20% may indicate unused or underutilized bandwidth'
+            },
+            {
+                id: Date.now() + 2,
+                name: 'Very Old Circuit - Over 48 Months',
+                condition: 'age',
+                operator: '>',
+                value: 48,
+                description: 'Circuits older than 4 years may be part of legacy network requiring modernization'
+            },
+            {
+                id: Date.now() + 3,
+                name: 'High Cost per Mbps',
+                condition: 'cost',
+                operator: '>',
+                value: 15,
+                description: 'High cost circuits may be candidates for cost optimization or provider migration'
+            },
+            {
+                id: Date.now() + 4,
+                name: 'Minimal Traffic Volume',
+                condition: 'traffic',
+                operator: '<',
+                value: 50,
+                description: 'Very low traffic volume suggests circuit is redundant or unused'
+            },
+            {
+                id: Date.now() + 5,
+                name: 'Extremely Low Utilization - Under 10%',
+                condition: 'utilization',
+                operator: '<',
+                value: 10,
+                description: 'Critical: Circuits under 10% utilization are strong candidates for immediate decommission'
+            }
+        ];
+        
+        rules = defaultRules;
+        saveData();
+    }
+}
 
 // Tab Navigation
 function initializeTabs() {
