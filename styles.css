@@ -2453,17 +2453,20 @@ textarea {
     /* Tabs */
     .tabs {
         display: none;
-        position: absolute;
-        top: 100%;
+        position: fixed;
+        top: auto;
+        bottom: 0;
         left: 0;
         right: 0;
         background: white;
         flex-direction: column;
         gap: 0;
         margin: 0;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 1000;
-        border-bottom: 4px solid #CD040B;
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1500;
+        border-top: 4px solid #CD040B;
+        max-height: 70vh;
+        overflow-y: auto;
     }
 
     .tabs.mobile-open {
@@ -2901,6 +2904,11 @@ textarea {
     /* AI Agent Footer - Mobile */
     .learning-footer {
         padding: 12px 10px;
+        bottom: -100px; /* Ensure it stays hidden by default on mobile */
+    }
+
+    .learning-footer.active {
+        bottom: 0; /* Show when active */
     }
 
     .learning-agents {
