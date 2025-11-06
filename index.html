@@ -24,13 +24,153 @@
 
         <!-- Navigation Tabs -->
         <nav class="tabs">
-            <button class="tab-btn active" data-tab="rules">Heuristic Rules</button>
+            <button class="tab-btn active" data-tab="analytics">Analytics</button>
+            <button class="tab-btn" data-tab="rules">Heuristic Rules</button>
             <button class="tab-btn" data-tab="review">Circuit Review</button>
             <button class="tab-btn" data-tab="decommission">Decommission</button>
         </nav>
 
+        <!-- Analytics Section -->
+        <section id="analytics" class="tab-content active">
+            <div class="section-header">
+                <h2>Analytics Dashboard</h2>
+                <p>Comprehensive overview of circuit decommissioning metrics</p>
+            </div>
+
+            <!-- Key Metrics Cards -->
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <div class="analytics-icon">📊</div>
+                    <div class="analytics-content">
+                        <h3 id="analytics-total">0</h3>
+                        <p>Total Circuits</p>
+                    </div>
+                </div>
+
+                <div class="analytics-card flagged">
+                    <div class="analytics-icon">⚠️</div>
+                    <div class="analytics-content">
+                        <h3 id="analytics-flagged">0</h3>
+                        <p>Flagged for Review</p>
+                    </div>
+                </div>
+
+                <div class="analytics-card approved">
+                    <div class="analytics-icon">✓</div>
+                    <div class="analytics-content">
+                        <h3 id="analytics-approved">0</h3>
+                        <p>Validated for Decommission</p>
+                    </div>
+                </div>
+
+                <div class="analytics-card rejected">
+                    <div class="analytics-icon">✗</div>
+                    <div class="analytics-content">
+                        <h3 id="analytics-rejected">0</h3>
+                        <p>Kept Active</p>
+                    </div>
+                </div>
+
+                <div class="analytics-card in-process">
+                    <div class="analytics-icon">🔄</div>
+                    <div class="analytics-content">
+                        <h3 id="analytics-in-process">0</h3>
+                        <p>Sent for Decommission</p>
+                    </div>
+                </div>
+
+                <div class="analytics-card pending">
+                    <div class="analytics-icon">⏳</div>
+                    <div class="analytics-content">
+                        <h3 id="analytics-pending">0</h3>
+                        <p>Pending Action</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Statistics -->
+            <div class="card">
+                <h3>Decommission Pipeline Status</h3>
+                <div class="pipeline-stats">
+                    <div class="pipeline-stage">
+                        <div class="stage-number">1</div>
+                        <div class="stage-content">
+                            <h4>Analysis</h4>
+                            <p class="stage-count" id="stage-analysis">0 circuits</p>
+                            <p class="stage-desc">Active circuits analyzed by rules</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-stage">
+                        <div class="stage-number">2</div>
+                        <div class="stage-content">
+                            <h4>Under Review</h4>
+                            <p class="stage-count" id="stage-review">0 circuits</p>
+                            <p class="stage-desc">Flagged circuits awaiting engineer review</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-stage">
+                        <div class="stage-number">3</div>
+                        <div class="stage-content">
+                            <h4>Approved</h4>
+                            <p class="stage-count" id="stage-approved">0 circuits</p>
+                            <p class="stage-desc">Validated and ready for decommission</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-arrow">→</div>
+                    <div class="pipeline-stage">
+                        <div class="stage-number">4</div>
+                        <div class="stage-content">
+                            <h4>In Process</h4>
+                            <p class="stage-count" id="stage-in-process">0 circuits</p>
+                            <p class="stage-desc">Actively being decommissioned</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rules Summary -->
+            <div class="card">
+                <h3>Rules Summary</h3>
+                <div class="rules-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Active Rules:</span>
+                        <span class="summary-value" id="analytics-rules">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Most Matched Rule:</span>
+                        <span class="summary-value" id="analytics-top-rule">N/A</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Savings -->
+            <div class="card">
+                <h3>Potential Cost Savings</h3>
+                <div class="savings-grid">
+                    <div class="savings-card">
+                        <p class="savings-label">Circuits to Decommission</p>
+                        <h3 class="savings-value" id="savings-circuits">0</h3>
+                    </div>
+                    <div class="savings-card">
+                        <p class="savings-label">Total Bandwidth (Mbps)</p>
+                        <h3 class="savings-value" id="savings-bandwidth">0</h3>
+                    </div>
+                    <div class="savings-card">
+                        <p class="savings-label">Avg Utilization</p>
+                        <h3 class="savings-value" id="savings-utilization">0%</h3>
+                    </div>
+                    <div class="savings-card">
+                        <p class="savings-label">Avg Age (months)</p>
+                        <h3 class="savings-value" id="savings-age">0</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Rules Management Section -->
-        <section id="rules" class="tab-content active">
+        <section id="rules" class="tab-content">
             <div class="section-header">
                 <h2>Manage Heuristic Rules</h2>
                 <p>Define rules to identify circuits eligible for decommissioning</p>

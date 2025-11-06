@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateStats();
     renderDecommissionList();
     updateDecommissionStats();
+    updateAnalytics();
 });
 
 // Tab Navigation
@@ -52,6 +53,7 @@ function initializeRuleForm() {
         rules.push(rule);
         saveData();
         renderRules();
+        updateAnalytics();
         form.reset();
         
         showNotification('Rule added successfully!');
@@ -87,6 +89,7 @@ function deleteRule(ruleId) {
         rules = rules.filter(rule => rule.id !== ruleId);
         saveData();
         renderRules();
+        updateAnalytics();
         showNotification('Rule deleted successfully!');
     }
 }
@@ -227,6 +230,7 @@ function runAnalysis() {
     saveData();
     renderCircuits();
     updateStats();
+    updateAnalytics();
     showNotification('Analysis completed!');
 }
 
@@ -365,6 +369,7 @@ function approveDecommission(circuitId) {
     updateStats();
     renderDecommissionList();
     updateDecommissionStats();
+    updateAnalytics();
     showNotification(`Circuit ${circuitId} approved for decommission.`);
 }
 
@@ -390,6 +395,7 @@ function rejectDecommission(circuitId) {
     updateStats();
     renderDecommissionList();
     updateDecommissionStats();
+    updateAnalytics();
     showNotification(`Circuit ${circuitId} will remain active.`);
 }
 
@@ -493,6 +499,7 @@ function sendForDecommission() {
     
     saveData();
     renderDecommissionList();
+    updateAnalytics();
     
     showNotification(`${circuitIds.length} circuit(s) sent for decommission!`);
 }
@@ -504,6 +511,78 @@ function updateDecommissionStats() {
     
     document.getElementById('pendingDecommission').textContent = `${pendingCircuits} Pending`;
     document.getElementById('processedDecommission').textContent = `${inProcessCircuits} In Process`;
+}
+
+// Update Analytics Dashboard
+function updateAnalytics() {
+    // Key Metrics
+    const total = circuits.length;
+    const flagged = circuits.filter(c => c.flagged && c.status === 'active').length;
+    const approved = circuits.filter(c => c.status === 'approved' && c.decommissionStatus !== 'in_process').length;
+    const rejected = circuits.filter(c => c.status === 'rejected').length;
+    const inProcess = circuits.filter(c => c.decommissionStatus === 'in_process').length;
+    const pending = circuits.filter(c => c.status === 'active' && !c.flagged).length;
+    
+    document.getElementById('analytics-total').textContent = total;
+    document.getElementById('analytics-flagged').textContent = flagged;
+    document.getElementById('analytics-approved').textContent = approved;
+    document.getElementById('analytics-rejected').textContent = rejected;
+    document.getElementById('analytics-in-process').textContent = inProcess;
+    document.getElementById('analytics-pending').textContent = pending;
+    
+    // Pipeline Stages
+    const activeCircuits = circuits.filter(c => c.status === 'active' || c.status === undefined).length;
+    const underReview = circuits.filter(c => c.flagged && c.status === 'active').length;
+    const approvedForDecom = circuits.filter(c => c.status === 'approved' && c.decommissionStatus !== 'in_process').length;
+    const inProcessDecom = circuits.filter(c => c.decommissionStatus === 'in_process').length;
+    
+    document.getElementById('stage-analysis').textContent = `${activeCircuits} circuits`;
+    document.getElementById('stage-review').textContent = `${underReview} circuits`;
+    document.getElementById('stage-approved').textContent = `${approvedForDecom} circuits`;
+    document.getElementById('stage-in-process').textContent = `${inProcessDecom} circuits`;
+    
+    // Rules Summary
+    document.getElementById('analytics-rules').textContent = rules.length;
+    
+    // Find most matched rule
+    const ruleMatches = {};
+    circuits.forEach(circuit => {
+        if (circuit.matchedRules) {
+            circuit.matchedRules.forEach(ruleName => {
+                ruleMatches[ruleName] = (ruleMatches[ruleName] || 0) + 1;
+            });
+        }
+    });
+    
+    let topRule = 'N/A';
+    let maxMatches = 0;
+    for (const [ruleName, count] of Object.entries(ruleMatches)) {
+        if (count > maxMatches) {
+            maxMatches = count;
+            topRule = `${ruleName} (${count} matches)`;
+        }
+    }
+    document.getElementById('analytics-top-rule').textContent = topRule;
+    
+    // Cost Savings (for approved + in-process circuits)
+    const decomCircuits = circuits.filter(c => c.status === 'approved' || c.decommissionStatus === 'in_process');
+    const totalDecomCircuits = decomCircuits.length;
+    
+    if (totalDecomCircuits > 0) {
+        const totalBandwidth = decomCircuits.reduce((sum, c) => sum + c.bandwidth, 0);
+        const avgUtilization = (decomCircuits.reduce((sum, c) => sum + c.utilization, 0) / totalDecomCircuits).toFixed(1);
+        const avgAge = Math.round(decomCircuits.reduce((sum, c) => sum + c.age, 0) / totalDecomCircuits);
+        
+        document.getElementById('savings-circuits').textContent = totalDecomCircuits;
+        document.getElementById('savings-bandwidth').textContent = totalBandwidth;
+        document.getElementById('savings-utilization').textContent = `${avgUtilization}%`;
+        document.getElementById('savings-age').textContent = avgAge;
+    } else {
+        document.getElementById('savings-circuits').textContent = '0';
+        document.getElementById('savings-bandwidth').textContent = '0';
+        document.getElementById('savings-utilization').textContent = '0%';
+        document.getElementById('savings-age').textContent = '0';
+    }
 }
 
 // Data Persistence
