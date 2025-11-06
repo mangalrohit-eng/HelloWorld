@@ -125,11 +125,6 @@
 
         <!-- Rules Management Section -->
         <section id="rules" class="tab-content">
-            <div class="section-header">
-                <h2>Manage Decommission Patterns</h2>
-                <p>Define patterns to identify circuits eligible for decommissioning</p>
-            </div>
-
             <!-- Sub-tabs for Decom Criteria -->
             <div class="sub-tabs">
                 <button class="sub-tab-btn active" data-subtab="aiRules"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Generated Patterns</button>
@@ -284,22 +279,22 @@
 
         <!-- Circuit Review Section -->
         <section id="review" class="tab-content active">
-            <div class="section-header">
-                <h2>Review Flagged Circuits</h2>
-                <p>Review circuits identified for decommissioning and add comments</p>
-            </div>
-
             <!-- Search and Filter Card -->
             <div class="card">
                 <div class="search-filter-section">
                 <!-- Search Bar -->
                 <div class="search-bar">
                     <input type="text" id="circuitSearch" placeholder="Search by Circuit ID, Location..." oninput="applyFilters()">
-                    <button class="btn btn-secondary" onclick="clearFilters()">Clear All</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="toggleFilters()" id="filterToggleBtn">
+                            <i class="fa-solid fa-filter"></i> Filters
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearFilters()">Clear All</button>
+                    </div>
                 </div>
 
                     <!-- Filter Controls -->
-                    <div class="filter-controls">
+                    <div class="filter-controls" id="filterSection" style="display: none;">
                         <div class="filter-group">
                             <label for="statusFilter">Status:</label>
                             <select id="statusFilter" onchange="applyFilters()">
@@ -388,11 +383,6 @@
 
         <!-- Decommission Section -->
         <section id="decommission" class="tab-content">
-            <div class="section-header">
-                <h2>Send Circuits for Decommission</h2>
-                <p>Approved circuits ready to be decommissioned</p>
-            </div>
-
             <div class="card">
                 <div class="decommission-toolbar">
                     <div class="decommission-stats">
@@ -412,11 +402,6 @@
 
         <!-- Analytics Section -->
         <section id="analytics" class="tab-content">
-            <div class="section-header">
-                <h2>Analytics Dashboard</h2>
-                <p>Comprehensive overview of circuit decommissioning metrics</p>
-            </div>
-
             <!-- Sub-tabs for Analytics -->
             <div class="sub-tabs">
                 <button class="sub-tab-btn active" data-subtab="analyticsOverview"><i class="fa-solid fa-chart-pie"></i> Analytics Overview</button>

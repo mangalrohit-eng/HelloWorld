@@ -1979,6 +1979,20 @@ function applyFilters() {
 }
 
 // Clear all filters
+// Toggle Filters
+function toggleFilters() {
+    const filterSection = document.getElementById('filterSection');
+    const toggleBtn = document.getElementById('filterToggleBtn');
+    
+    if (filterSection.style.display === 'none') {
+        filterSection.style.display = 'grid';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-filter"></i> Hide Filters';
+    } else {
+        filterSection.style.display = 'none';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-filter"></i> Filters';
+    }
+}
+
 function clearFilters() {
     if (document.getElementById('circuitSearch')) document.getElementById('circuitSearch').value = '';
     if (document.getElementById('statusFilter')) document.getElementById('statusFilter').value = 'all';
