@@ -61,7 +61,8 @@ function createDefaultRules() {
                 condition: 'age',
                 operator: '>',
                 value: 48,
-                description: 'Circuits older than 4 years may be part of legacy network requiring modernization'
+                description: 'Circuits older than 4 years may be part of legacy network requiring modernization',
+                aiGenerated: true
             },
             {
                 id: Date.now() + 3,
@@ -79,7 +80,8 @@ function createDefaultRules() {
                 condition: 'traffic',
                 operator: '<',
                 value: 50,
-                description: 'Very low traffic volume suggests circuit is redundant or unused'
+                description: 'Very low traffic volume suggests circuit is redundant or unused',
+                aiGenerated: true
             },
             {
                 id: Date.now() + 5,
