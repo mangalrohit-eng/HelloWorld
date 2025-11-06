@@ -129,6 +129,12 @@ body {
     align-items: center;
 }
 
+.verizon-logo-svg {
+    height: 32px;
+    width: auto;
+    display: block;
+}
+
 .verizon-logo-img {
     height: 32px;
     width: auto;
@@ -1605,6 +1611,10 @@ textarea {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
+    }
+
+    .verizon-logo-svg {
+        height: 24px;
     }
 
     .verizon-logo-img {
