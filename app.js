@@ -313,11 +313,11 @@ function runAnalysisAgent1() {
     const status = document.getElementById('learningStatus1');
     
     agent.classList.add('working');
-    status.textContent = 'Fetching circuits...';
+    status.textContent = 'Data Retrieval Agent fetching circuits...';
     document.getElementById('learningProgressBar').style.width = '10%';
     
     setTimeout(() => {
-        status.textContent = `${circuits.length} circuits loaded`;
+        status.textContent = `AI Agent loaded ${circuits.length} circuits`;
         agent.classList.remove('working');
         agent.classList.add('completed');
         document.getElementById('learningProgressBar').style.width = '25%';
@@ -330,7 +330,7 @@ function runAnalysisAgent2() {
     const status = document.getElementById('learningStatus2');
     
     agent.classList.add('working');
-    status.textContent = 'Applying rules...';
+    status.textContent = 'Rules Engine Agent applying criteria...';
     document.getElementById('learningProgressBar').style.width = '35%';
     
     // Reset all circuits
@@ -364,7 +364,7 @@ function runAnalysisAgent2() {
     const flaggedCount = circuits.filter(c => c.flagged).length;
     
     setTimeout(() => {
-        status.textContent = `${flaggedCount} circuits flagged`;
+        status.textContent = `AI Agent flagged ${flaggedCount} circuits`;
         agent.classList.remove('working');
         agent.classList.add('completed');
         document.getElementById('learningProgressBar').style.width = '50%';
@@ -377,13 +377,13 @@ function runAnalysisAgent3() {
     const status = document.getElementById('learningStatus3');
     
     agent.classList.add('working');
-    status.textContent = 'Validating results...';
+    status.textContent = 'Validation Agent checking results...';
     document.getElementById('learningProgressBar').style.width = '60%';
     
     const flaggedCircuits = circuits.filter(c => c.flagged);
     
     setTimeout(() => {
-        status.textContent = `${flaggedCircuits.length} circuits validated`;
+        status.textContent = `AI Agent validated ${flaggedCircuits.length} circuits`;
         agent.classList.remove('working');
         agent.classList.add('completed');
         document.getElementById('learningProgressBar').style.width = '75%';
@@ -396,7 +396,7 @@ function runAnalysisAgent4() {
     const status = document.getElementById('learningStatus4');
     
     agent.classList.add('working');
-    status.textContent = 'Updating dashboard...';
+    status.textContent = 'Output Agent preparing dashboard...';
     document.getElementById('learningProgressBar').style.width = '85%';
     
     // Save and update
@@ -406,7 +406,7 @@ function runAnalysisAgent4() {
     updateAnalytics();
     
     setTimeout(() => {
-        status.textContent = 'Analysis complete';
+        status.textContent = 'AI Agent completed analysis';
         agent.classList.remove('working');
         agent.classList.add('completed');
         document.getElementById('learningProgressBar').style.width = '100%';
@@ -462,11 +462,11 @@ function runLearningAgent1(rejectedCircuits) {
     const status = document.getElementById('learningStatus1');
     
     agent.classList.add('working');
-    status.textContent = 'Collecting feedback...';
+    status.textContent = 'Data Collection Agent gathering feedback...';
     document.getElementById('learningProgressBar').style.width = '10%';
     
     setTimeout(() => {
-        status.textContent = `Collected ${rejectedCircuits.length} rejections`;
+        status.textContent = `AI Agent collected ${rejectedCircuits.length} rejections`;
         agent.classList.remove('working');
         agent.classList.add('completed');
         document.getElementById('learningProgressBar').style.width = '25%';
@@ -479,11 +479,11 @@ function runLearningAgent2(rejectedCircuits) {
     const status = document.getElementById('learningStatus2');
     
     agent.classList.add('working');
-    status.textContent = 'Analyzing patterns...';
+    status.textContent = 'Pattern Analysis Agent analyzing feedback...';
     document.getElementById('learningProgressBar').style.width = '35%';
     
     setTimeout(() => {
-        status.textContent = 'Patterns identified';
+        status.textContent = 'AI Agent identified patterns';
         agent.classList.remove('working');
         agent.classList.add('completed');
         document.getElementById('learningProgressBar').style.width = '50%';
@@ -496,14 +496,14 @@ function runLearningAgent3(rejectedCircuits) {
     const status = document.getElementById('learningStatus3');
     
     agent.classList.add('working');
-    status.textContent = 'Generating rules...';
+    status.textContent = 'Rule Generation Agent creating exclusions...';
     document.getElementById('learningProgressBar').style.width = '60%';
     
     // Actually analyze and generate rules
     const suggestedRules = analyzeRejectionReasons(rejectedCircuits);
     
     setTimeout(() => {
-        status.textContent = `${suggestedRules.length} rules created`;
+        status.textContent = `AI Agent created ${suggestedRules.length} rules`;
         agent.classList.remove('working');
         agent.classList.add('completed');
         document.getElementById('learningProgressBar').style.width = '75%';
@@ -516,11 +516,11 @@ function runLearningAgent4(suggestedRules) {
     const status = document.getElementById('learningStatus4');
     
     agent.classList.add('working');
-    status.textContent = 'Validating rules...';
+    status.textContent = 'Validation Agent verifying rules...';
     document.getElementById('learningProgressBar').style.width = '85%';
     
     setTimeout(() => {
-        status.textContent = 'Validation complete';
+        status.textContent = 'AI Agent completed validation';
         agent.classList.remove('working');
         agent.classList.add('completed');
         document.getElementById('learningProgressBar').style.width = '100%';
