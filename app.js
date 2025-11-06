@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
     renderRules();
     generateSampleCircuits();
     updateStats();
+    renderDecommissionList();
+    updateDecommissionStats();
 });
 
 // Tab Navigation
@@ -361,6 +363,8 @@ function approveDecommission(circuitId) {
     saveData();
     renderCircuits();
     updateStats();
+    renderDecommissionList();
+    updateDecommissionStats();
     showNotification(`Circuit ${circuitId} approved for decommission.`);
 }
 
@@ -384,6 +388,8 @@ function rejectDecommission(circuitId) {
     saveData();
     renderCircuits();
     updateStats();
+    renderDecommissionList();
+    updateDecommissionStats();
     showNotification(`Circuit ${circuitId} will remain active.`);
 }
 
@@ -394,6 +400,110 @@ function updateStats() {
     
     document.getElementById('totalCircuits').textContent = `${totalCircuits} Circuits`;
     document.getElementById('flaggedCircuits').textContent = `${flaggedCircuits} Flagged`;
+}
+
+// Render Decommission List
+function renderDecommissionList() {
+    const decommissionList = document.getElementById('decommissionList');
+    const approvedCircuits = circuits.filter(c => c.status === 'approved' || c.decommissionStatus === 'in_process');
+    
+    if (approvedCircuits.length === 0) {
+        decommissionList.innerHTML = '<div class="card"><div class="empty-state">No circuits approved for decommission yet.</div></div>';
+        return;
+    }
+    
+    decommissionList.innerHTML = approvedCircuits.map(circuit => `
+        <div class="decommission-card ${circuit.decommissionStatus === 'in_process' ? 'in-process' : ''}">
+            ${circuit.decommissionStatus !== 'in_process' ? `
+                <div class="decommission-checkbox">
+                    <input type="checkbox" 
+                           id="check-${circuit.id}" 
+                           data-circuit-id="${circuit.id}"
+                           ${circuit.decommissionStatus === 'in_process' ? 'disabled' : ''}>
+                </div>
+            ` : ''}
+            <div class="decommission-content">
+                <div class="decommission-header">
+                    <div class="decommission-info">
+                        <h4>${circuit.id}</h4>
+                        <p style="color: #666666; font-size: 0.95rem;">${circuit.location}</p>
+                    </div>
+                    <span class="decommission-status ${circuit.decommissionStatus === 'in_process' ? 'in-process' : 'pending'}">
+                        ${circuit.decommissionStatus === 'in_process' ? '🔄 In Process' : '✓ Pending'}
+                    </span>
+                </div>
+                
+                <div class="decommission-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Bandwidth</span>
+                        <span class="detail-value">${circuit.bandwidth} Mbps</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Utilization</span>
+                        <span class="detail-value">${circuit.utilization}%</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Age</span>
+                        <span class="detail-value">${circuit.age} months</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Cost/Mbps</span>
+                        <span class="detail-value">$${circuit.cost}</span>
+                    </div>
+                </div>
+                
+                ${circuit.comments.length > 0 ? `
+                    <div class="decommission-comments">
+                        <strong>Last Engineer Comment:</strong>
+                        <p>${circuit.comments[circuit.comments.length - 1].text}</p>
+                    </div>
+                ` : ''}
+                
+                ${circuit.decommissionStatus === 'in_process' ? `
+                    <div style="margin-top: 10px; padding: 10px; background: #FFF5F5; border-left: 4px solid #CD040B;">
+                        <strong style="color: #CD040B;">⚙️ Decommission initiated on ${circuit.decommissionDate}</strong>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+    
+    updateDecommissionStats();
+}
+
+// Send for Decommission
+function sendForDecommission() {
+    const checkboxes = document.querySelectorAll('#decommissionList input[type="checkbox"]:checked');
+    
+    if (checkboxes.length === 0) {
+        alert('Please select at least one circuit to send for decommission.');
+        return;
+    }
+    
+    const circuitIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-circuit-id'));
+    
+    // Update circuit statuses
+    circuitIds.forEach(id => {
+        const circuit = circuits.find(c => c.id === id);
+        if (circuit) {
+            circuit.decommissionStatus = 'in_process';
+            circuit.decommissionDate = new Date().toLocaleString();
+        }
+    });
+    
+    saveData();
+    renderDecommissionList();
+    
+    showNotification(`${circuitIds.length} circuit(s) sent for decommission!`);
+}
+
+// Update Decommission Stats
+function updateDecommissionStats() {
+    const pendingCircuits = circuits.filter(c => c.status === 'approved' && c.decommissionStatus !== 'in_process').length;
+    const inProcessCircuits = circuits.filter(c => c.decommissionStatus === 'in_process').length;
+    
+    document.getElementById('pendingDecommission').textContent = `${pendingCircuits} Pending`;
+    document.getElementById('processedDecommission').textContent = `${inProcessCircuits} In Process`;
 }
 
 // Data Persistence

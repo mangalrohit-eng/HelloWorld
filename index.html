@@ -26,6 +26,7 @@
         <nav class="tabs">
             <button class="tab-btn active" data-tab="rules">Heuristic Rules</button>
             <button class="tab-btn" data-tab="review">Circuit Review</button>
+            <button class="tab-btn" data-tab="decommission">Decommission</button>
         </nav>
 
         <!-- Rules Management Section -->
@@ -109,6 +110,30 @@
 
             <div id="circuitsList" class="circuits-list">
                 <!-- Circuits will be populated here -->
+            </div>
+        </section>
+
+        <!-- Decommission Section -->
+        <section id="decommission" class="tab-content">
+            <div class="section-header">
+                <h2>Send Circuits for Decommission</h2>
+                <p>Approved circuits ready to be decommissioned</p>
+            </div>
+
+            <div class="card">
+                <div class="decommission-toolbar">
+                    <div class="decommission-stats">
+                        <span class="stat-badge" id="pendingDecommission">0 Pending</span>
+                        <span class="stat-badge" id="processedDecommission">0 In Process</span>
+                    </div>
+                    <button class="btn btn-primary" id="sendDecommissionBtn" onclick="sendForDecommission()">
+                        📤 Send Selected for Decommission
+                    </button>
+                </div>
+            </div>
+
+            <div id="decommissionList" class="decommission-list">
+                <!-- Approved circuits will be populated here -->
             </div>
         </section>
     </div>
