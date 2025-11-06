@@ -785,7 +785,10 @@ function generateSampleCircuits() {
             hardware_eol: hardwareEolStatuses[Math.floor(Math.random() * hardwareEolStatuses.length)],
             provider_status: providerStatuses[Math.floor(Math.random() * providerStatuses.length)],
             status: status,
-            comments: comments
+            comments: comments,
+            flagged: false,
+            matchedRules: [],
+            selected: false
         });
     }
     
@@ -1327,7 +1330,7 @@ function renderCircuits(circuitsToRender = null) {
                 </div>
             </div>
             
-            ${circuit.flagged && circuit.matchedRules.length > 0 ? `
+            ${circuit.flagged && circuit.matchedRules && circuit.matchedRules.length > 0 ? `
                 <div class="matched-rules">
                     <strong><i class="fa-solid fa-triangle-exclamation"></i> Matched Patterns:</strong>
                     <ul>
@@ -1738,6 +1741,14 @@ function loadData() {
     
     if (savedCircuits) {
         circuits = JSON.parse(savedCircuits);
+        
+        // Migration: Ensure all circuits have required properties
+        circuits = circuits.map(circuit => ({
+            ...circuit,
+            flagged: circuit.flagged !== undefined ? circuit.flagged : false,
+            matchedRules: circuit.matchedRules || [],
+            selected: circuit.selected !== undefined ? circuit.selected : false
+        }));
     }
 }
 
