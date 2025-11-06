@@ -138,8 +138,34 @@ function initializeTabs() {
             // Add active class to clicked button and corresponding content
             this.classList.add('active');
             document.getElementById(targetTab).classList.add('active');
+            
+            // Close mobile menu after selection
+            const nav = document.getElementById('mainNav');
+            if (nav && nav.classList.contains('mobile-open')) {
+                nav.classList.remove('mobile-open');
+            }
         });
     });
+}
+
+// Mobile Menu Toggle
+function toggleMobileMenu() {
+    const nav = document.getElementById('mainNav');
+    const toggle = document.getElementById('mobileMenuToggle');
+    
+    if (nav) {
+        nav.classList.toggle('mobile-open');
+        
+        // Update icon
+        const icon = toggle.querySelector('i');
+        if (nav.classList.contains('mobile-open')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+        } else {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    }
 }
 
 // Sub-tab Navigation

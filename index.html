@@ -109,11 +109,14 @@
                 <div class="header-title">
                     <h1>Circuit Decommission Portal</h1>
                 </div>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="toggleMobileMenu()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
             </div>
         </header>
 
         <!-- Navigation Tabs -->
-        <nav class="tabs">
+        <nav class="tabs" id="mainNav">
             <button class="tab-btn active" data-tab="review">Review Circuits for Decom</button>
             <button class="tab-btn" data-tab="decommission">Send Circuits to Decom</button>
             <button class="tab-btn" data-tab="analytics">View Reports</button>

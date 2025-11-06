@@ -209,6 +209,22 @@ body {
     display: flex;
     align-items: center;
     gap: 24px;
+    position: relative;
+}
+
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #000000;
+    cursor: pointer;
+    padding: 8px;
+    margin-left: auto;
+}
+
+.mobile-menu-toggle:hover {
+    color: #CD040B;
 }
 
 .logo-section {
@@ -2429,21 +2445,48 @@ textarea {
         font-size: 0.75rem;
     }
 
+    /* Mobile Menu Toggle */
+    .mobile-menu-toggle {
+        display: block;
+    }
+
     /* Tabs */
     .tabs {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        flex-wrap: nowrap;
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        flex-direction: column;
         gap: 0;
         margin: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        border-bottom: 4px solid #CD040B;
+    }
+
+    .tabs.mobile-open {
+        display: flex;
     }
 
     .tab-btn {
-        padding: 14px 16px;
-        font-size: 0.875rem;
-        white-space: nowrap;
-        flex: 0 0 auto;
-        min-width: auto;
+        padding: 16px 20px;
+        font-size: 0.95rem;
+        white-space: normal;
+        text-align: left;
+        border-bottom: 1px solid #E5E5E5;
+        border-radius: 0;
+        min-width: 100%;
+    }
+
+    .tab-btn:last-child {
+        border-bottom: none;
+    }
+
+    .tab-btn.active {
+        background: #F6F6F6;
+        border-left: 4px solid #CD040B;
     }
 
     /* Sub-tabs */
@@ -2853,6 +2896,43 @@ textarea {
 
     .history-event {
         padding: 12px;
+    }
+
+    /* AI Agent Footer - Mobile */
+    .learning-footer {
+        padding: 12px 10px;
+    }
+
+    .learning-agents {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .learning-agent {
+        flex-direction: column;
+        text-align: center;
+        padding: 12px;
+    }
+
+    .agent-icon-small {
+        font-size: 1.8rem;
+    }
+
+    .agent-text-small {
+        font-size: 0.8rem;
+    }
+
+    .agent-status-text {
+        font-size: 0.75rem;
+        margin-top: 4px;
+    }
+
+    .agent-arrow-small {
+        display: none;
+    }
+
+    .learning-progress {
+        margin-top: 12px;
     }
 }
 
