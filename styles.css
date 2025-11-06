@@ -5,8 +5,8 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: #F6F6F6;
     min-height: 100vh;
     padding: 20px;
 }
@@ -18,21 +18,32 @@ body {
 
 /* Header */
 .header {
-    background: white;
-    border-radius: 12px;
+    background: #000000;
+    border-radius: 0;
     padding: 30px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    border-bottom: 4px solid #CD040B;
+}
+
+.logo-section {
+    margin-bottom: 20px;
+}
+
+.verizon-logo {
+    height: 50px;
+    width: auto;
 }
 
 .header-content h1 {
-    color: #2d3748;
+    color: #FFFFFF;
     font-size: 2.5rem;
     margin-bottom: 8px;
+    font-weight: 700;
 }
 
 .subtitle {
-    color: #718096;
+    color: #CCCCCC;
     font-size: 1.1rem;
 }
 
@@ -47,25 +58,29 @@ body {
     flex: 1;
     padding: 15px 30px;
     background: white;
-    border: none;
-    border-radius: 8px;
+    border: 2px solid #CCCCCC;
+    border-radius: 0;
     font-size: 1rem;
-    font-weight: 600;
-    color: #4a5568;
+    font-weight: 700;
+    color: #000000;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .tab-btn:hover {
-    background: #f7fafc;
+    background: #F6F6F6;
+    border-color: #CD040B;
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
 
 .tab-btn.active {
-    background: #667eea;
+    background: #CD040B;
     color: white;
+    border-color: #CD040B;
 }
 
 /* Tab Content */
@@ -80,38 +95,42 @@ body {
 /* Section Header */
 .section-header {
     background: white;
-    border-radius: 12px;
+    border-radius: 0;
     padding: 25px;
     margin-bottom: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #CD040B;
 }
 
 .section-header h2 {
-    color: #2d3748;
+    color: #000000;
     font-size: 1.8rem;
     margin-bottom: 8px;
+    font-weight: 700;
 }
 
 .section-header p {
-    color: #718096;
+    color: #666666;
     font-size: 1rem;
 }
 
 /* Cards */
 .card {
     background: white;
-    border-radius: 12px;
+    border-radius: 0;
     padding: 30px;
     margin-bottom: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-top: 3px solid #000000;
 }
 
 .card h3 {
-    color: #2d3748;
+    color: #000000;
     font-size: 1.4rem;
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #CD040B;
+    font-weight: 700;
 }
 
 /* Forms */
@@ -127,8 +146,8 @@ body {
 
 label {
     display: block;
-    color: #2d3748;
-    font-weight: 600;
+    color: #000000;
+    font-weight: 700;
     margin-bottom: 8px;
     font-size: 0.95rem;
 }
@@ -139,8 +158,8 @@ select,
 textarea {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
+    border: 2px solid #CCCCCC;
+    border-radius: 0;
     font-size: 1rem;
     font-family: inherit;
     transition: border-color 0.3s ease;
@@ -150,7 +169,8 @@ input:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #CD040B;
+    box-shadow: 0 0 0 2px rgba(205, 4, 11, 0.1);
 }
 
 textarea {
@@ -161,66 +181,68 @@ textarea {
 .btn {
     padding: 12px 30px;
     border: none;
-    border-radius: 8px;
+    border-radius: 0;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .btn-primary {
-    background: #667eea;
+    background: #CD040B;
     color: white;
 }
 
 .btn-primary:hover {
-    background: #5568d3;
+    background: #A00309;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 8px rgba(205, 4, 11, 0.4);
 }
 
 .btn-secondary {
-    background: #48bb78;
+    background: #000000;
     color: white;
 }
 
 .btn-secondary:hover {
-    background: #38a169;
+    background: #333333;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(72, 187, 120, 0.4);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 .btn-danger {
-    background: #f56565;
+    background: #CD040B;
     color: white;
     padding: 8px 16px;
     font-size: 0.9rem;
 }
 
 .btn-danger:hover {
-    background: #e53e3e;
+    background: #A00309;
 }
 
 .btn-approve {
-    background: #48bb78;
+    background: #000000;
     color: white;
     padding: 8px 20px;
     font-size: 0.9rem;
 }
 
 .btn-approve:hover {
-    background: #38a169;
+    background: #333333;
 }
 
 .btn-reject {
-    background: #ed8936;
+    background: #CD040B;
     color: white;
     padding: 8px 20px;
     font-size: 0.9rem;
 }
 
 .btn-reject:hover {
-    background: #dd6b20;
+    background: #A00309;
 }
 
 /* Rules List */
@@ -231,16 +253,17 @@ textarea {
 }
 
 .rule-item {
-    background: #f7fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
+    background: #F6F6F6;
+    border: 2px solid #CCCCCC;
+    border-left: 4px solid #CD040B;
+    border-radius: 0;
     padding: 20px;
     transition: all 0.3s ease;
 }
 
 .rule-item:hover {
-    border-color: #667eea;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    border-left-color: #000000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .rule-header {
@@ -251,23 +274,23 @@ textarea {
 }
 
 .rule-name {
-    color: #2d3748;
+    color: #000000;
     font-weight: 700;
     font-size: 1.1rem;
 }
 
 .rule-condition {
-    color: #4a5568;
+    color: #333333;
     font-size: 0.95rem;
     margin-bottom: 8px;
 }
 
 .rule-condition strong {
-    color: #667eea;
+    color: #CD040B;
 }
 
 .rule-description {
-    color: #718096;
+    color: #666666;
     font-size: 0.9rem;
     font-style: italic;
 }
@@ -291,17 +314,19 @@ textarea {
 }
 
 .stat-badge {
-    background: #e2e8f0;
-    color: #2d3748;
+    background: #000000;
+    color: #FFFFFF;
     padding: 8px 16px;
-    border-radius: 20px;
+    border-radius: 0;
     font-size: 0.9rem;
-    font-weight: 600;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .stat-badge.flagged {
-    background: #fed7d7;
-    color: #c53030;
+    background: #CD040B;
+    color: #FFFFFF;
 }
 
 /* Circuits List */
@@ -313,25 +338,25 @@ textarea {
 
 .circuit-card {
     background: white;
-    border-radius: 12px;
+    border-radius: 0;
     padding: 25px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-left: 5px solid #e2e8f0;
+    border-left: 5px solid #CCCCCC;
     transition: all 0.3s ease;
 }
 
 .circuit-card.flagged {
-    border-left-color: #f56565;
+    border-left-color: #CD040B;
 }
 
 .circuit-card.approved {
-    border-left-color: #48bb78;
-    background: #f0fff4;
+    border-left-color: #000000;
+    background: #F6F6F6;
 }
 
 .circuit-card.rejected {
-    border-left-color: #ed8936;
-    background: #fffaf0;
+    border-left-color: #CD040B;
+    background: #FFF5F5;
 }
 
 .circuit-header {
@@ -342,31 +367,34 @@ textarea {
 }
 
 .circuit-info h4 {
-    color: #2d3748;
+    color: #000000;
     font-size: 1.3rem;
     margin-bottom: 5px;
+    font-weight: 700;
 }
 
 .circuit-status {
     padding: 6px 12px;
-    border-radius: 20px;
+    border-radius: 0;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .circuit-status.flagged {
-    background: #fed7d7;
-    color: #c53030;
+    background: #CD040B;
+    color: #FFFFFF;
 }
 
 .circuit-status.approved {
-    background: #c6f6d5;
-    color: #22543d;
+    background: #000000;
+    color: #FFFFFF;
 }
 
 .circuit-status.rejected {
-    background: #feebc8;
-    color: #7c2d12;
+    background: #CD040B;
+    color: #FFFFFF;
 }
 
 .circuit-details {
@@ -375,8 +403,9 @@ textarea {
     gap: 15px;
     margin-bottom: 15px;
     padding: 15px;
-    background: #f7fafc;
-    border-radius: 8px;
+    background: #F6F6F6;
+    border-radius: 0;
+    border: 1px solid #CCCCCC;
 }
 
 .detail-item {
@@ -385,29 +414,33 @@ textarea {
 }
 
 .detail-label {
-    color: #718096;
+    color: #666666;
     font-size: 0.85rem;
     margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .detail-value {
-    color: #2d3748;
-    font-weight: 600;
+    color: #000000;
+    font-weight: 700;
     font-size: 1rem;
 }
 
 .matched-rules {
     margin-bottom: 15px;
     padding: 12px;
-    background: #fff5f5;
-    border-radius: 8px;
-    border-left: 3px solid #f56565;
+    background: #FFF5F5;
+    border-radius: 0;
+    border-left: 4px solid #CD040B;
+    border: 2px solid #CD040B;
 }
 
 .matched-rules strong {
-    color: #c53030;
+    color: #CD040B;
     display: block;
     margin-bottom: 8px;
+    font-weight: 700;
 }
 
 .matched-rules ul {
@@ -416,14 +449,14 @@ textarea {
 }
 
 .matched-rules li {
-    color: #742a2a;
+    color: #000000;
     padding: 4px 0;
     font-size: 0.9rem;
 }
 
 .matched-rules li:before {
     content: "• ";
-    color: #f56565;
+    color: #CD040B;
     font-weight: bold;
     margin-right: 8px;
 }
@@ -431,7 +464,7 @@ textarea {
 .comment-section {
     margin-top: 15px;
     padding-top: 15px;
-    border-top: 2px solid #e2e8f0;
+    border-top: 2px solid #CCCCCC;
 }
 
 .comment-section textarea {
@@ -447,32 +480,35 @@ textarea {
 .existing-comments {
     margin-top: 15px;
     padding: 15px;
-    background: #f7fafc;
-    border-radius: 8px;
+    background: #F6F6F6;
+    border-radius: 0;
+    border: 2px solid #CCCCCC;
 }
 
 .existing-comments h5 {
-    color: #2d3748;
+    color: #000000;
     margin-bottom: 10px;
     font-size: 1rem;
+    font-weight: 700;
 }
 
 .comment-item {
     padding: 10px;
     margin-bottom: 8px;
     background: white;
-    border-radius: 6px;
-    border-left: 3px solid #667eea;
+    border-radius: 0;
+    border-left: 4px solid #000000;
 }
 
 .comment-meta {
-    color: #718096;
+    color: #666666;
     font-size: 0.85rem;
     margin-bottom: 5px;
+    font-weight: 700;
 }
 
 .comment-text {
-    color: #2d3748;
+    color: #000000;
     font-size: 0.95rem;
 }
 
