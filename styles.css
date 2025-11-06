@@ -345,6 +345,53 @@ textarea {
     font-size: 1.05rem;
 }
 
+/* Criteria Grid */
+.criteria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.criteria-category {
+    background: #F9F9F9;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #E0E0E0;
+}
+
+.criteria-category h4 {
+    color: #000000;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #CD040B;
+}
+
+.criteria-category ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.criteria-category li {
+    color: #4A4A4A;
+    font-size: 0.95rem;
+    padding: 10px 0;
+    padding-left: 24px;
+    position: relative;
+    line-height: 1.5;
+}
+
+.criteria-category li::before {
+    content: "•";
+    color: #CD040B;
+    font-weight: bold;
+    font-size: 1.2rem;
+    position: absolute;
+    left: 0;
+}
+
 /* Toolbar */
 .toolbar {
     display: flex;
