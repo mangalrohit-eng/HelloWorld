@@ -746,7 +746,9 @@ function generateSampleCircuits() {
             comments.push({
                 text: 'Keep active - this circuit carries 911 emergency traffic and cannot be decommissioned',
                 author: 'Network Engineer',
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                date: new Date().toLocaleString(),
+                decision: 'Keep Active'
             });
         }
         
@@ -756,7 +758,9 @@ function generateSampleCircuits() {
             comments.push({
                 text: 'Keep active - all circuits ending with 2 are part of critical infrastructure and cannot be decommissioned per company policy',
                 author: 'Network Engineer',
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                date: new Date().toLocaleString(),
+                decision: 'Keep Active'
             });
         }
         
@@ -766,7 +770,9 @@ function generateSampleCircuits() {
             comments.push({
                 text: 'Approved for decommission - Low utilization and redundant capacity available at nearby site',
                 author: 'Senior Network Engineer',
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                date: new Date().toLocaleString(),
+                decision: 'Approved for Decommission'
             });
         }
         
@@ -1371,7 +1377,18 @@ function renderCircuits(circuitsToRender = null) {
                 <div class="matched-rules">
                     <strong><i class="fa-solid fa-triangle-exclamation"></i> Matched Patterns:</strong>
                     <ul>
-                        ${circuit.matchedRules.map(ruleName => `<li>${ruleName}</li>`).join('')}
+                        ${circuit.matchedRules.map(ruleName => {
+                            // Check if this is an excluded rule (starts with [EXCLUDED])
+                            const isExcluded = ruleName.startsWith('[EXCLUDED]');
+                            const cleanRuleName = isExcluded ? ruleName.replace('[EXCLUDED] ', '') : ruleName;
+                            
+                            // Find the rule in the rules array to check if it's AI-generated
+                            const matchedRule = rules.find(r => r.name === cleanRuleName);
+                            const aiIcon = matchedRule && matchedRule.aiGenerated ? 
+                                ' <span class="ai-generated-badge-small" title="AI Generated Pattern"><i class="fa-solid fa-wand-magic-sparkles"></i></span>' : '';
+                            
+                            return `<li>${ruleName}${aiIcon}</li>`;
+                        }).join('')}
                     </ul>
                 </div>
             ` : ''}
@@ -1379,12 +1396,17 @@ function renderCircuits(circuitsToRender = null) {
             ${circuit.comments.length > 0 ? `
                 <div class="existing-comments">
                     <h5>Engineer Comments:</h5>
-                    ${circuit.comments.map(comment => `
-                        <div class="comment-item">
-                            <div class="comment-meta">${comment.date} - ${comment.decision}</div>
-                            <div class="comment-text">${comment.text}</div>
-                        </div>
-                    `).join('')}
+                    ${circuit.comments.map(comment => {
+                        // Handle both old format (author/timestamp) and new format (date/decision)
+                        const displayDate = comment.date || (comment.timestamp ? new Date(comment.timestamp).toLocaleString() : 'N/A');
+                        const displayDecision = comment.decision || (comment.author || 'Engineer');
+                        return `
+                            <div class="comment-item">
+                                <div class="comment-meta">${displayDate} - ${displayDecision}</div>
+                                <div class="comment-text">${comment.text}</div>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
             ` : ''}
             

@@ -724,6 +724,25 @@ textarea {
     }
 }
 
+.ai-generated-badge-small {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    vertical-align: middle;
+    margin-left: 6px;
+    box-shadow: 0 1px 3px rgba(102, 126, 234, 0.4);
+}
+
+.ai-generated-badge-small i {
+    font-size: 0.7rem;
+}
+
 .rule-type-badge {
     display: inline-block;
     padding: 4px 12px;
@@ -911,12 +930,12 @@ textarea {
 }
 
 .btn-success {
-    background: #28a745;
+    background: #2c5f2d;
     color: #FFFFFF;
 }
 
 .btn-success:hover {
-    background: #218838;
+    background: #234d24;
 }
 
 /* Circuit Item with Checkbox */
@@ -1335,7 +1354,7 @@ textarea {
 }
 
 .history-event.approved::before {
-    border-color: #28A745;
+    border-color: #2c5f2d;
 }
 
 .history-event.rejected::before {
@@ -2241,8 +2260,8 @@ textarea {
 
 .learning-agent.completed {
     background: #F1F8F4;
-    border-color: #28A745;
-    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+    border-color: #2c5f2d;
+    box-shadow: 0 2px 4px rgba(44, 95, 45, 0.2);
 }
 
 @keyframes pulseFooter {
@@ -2265,7 +2284,7 @@ textarea {
 }
 
 .learning-agent.completed .agent-icon-small {
-    color: #28A745;
+    color: #2c5f2d;
 }
 
 .agent-arrow-small {
@@ -2287,7 +2306,7 @@ textarea {
 }
 
 .learning-agent.completed .agent-status-text {
-    color: #28A745;
+    color: #2c5f2d;
     font-weight: 600;
 }
 
