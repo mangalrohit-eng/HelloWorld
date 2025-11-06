@@ -758,11 +758,26 @@ function generateSampleCircuits() {
     
     for (let i = 1; i <= 100; i++) {
         const bandwidth = bandwidths[Math.floor(Math.random() * bandwidths.length)];
-        const utilization = Math.floor(Math.random() * 100);
-        const age = Math.floor(Math.random() * 84) + 1; // 1-84 months (7 years)
+        
+        // Determine if this circuit should be a decom candidate (25-30% probability)
+        const shouldBeDecomCandidate = Math.random() < 0.28;
+        
+        let utilization, age, cost, traffic;
+        
+        if (shouldBeDecomCandidate) {
+            // Bad metrics - will likely match decom patterns
+            utilization = Math.floor(Math.random() * 25); // 0-25%
+            age = Math.floor(Math.random() * 36) + 48; // 48-84 months (old)
+            cost = (Math.random() * 10 + 15).toFixed(2); // $15-$25 per Mbps (high)
+        } else {
+            // Good metrics - won't match decom patterns
+            utilization = Math.floor(Math.random() * 50) + 30; // 30-80%
+            age = Math.floor(Math.random() * 36) + 6; // 6-42 months (newer)
+            cost = (Math.random() * 8 + 5).toFixed(2); // $5-$13 per Mbps (reasonable)
+        }
+        
         const trafficPercent = utilization / 100;
-        const traffic = Math.floor(bandwidth * trafficPercent * 0.9); // Traffic in GB
-        const cost = (Math.random() * 20 + 5).toFixed(2); // $5-$25 per Mbps
+        traffic = Math.floor(bandwidth * trafficPercent * 0.9); // Traffic in GB
         
         const circuitId = `CKT-2024-${String(i).padStart(3, '0')}`;
         const comments = [];
@@ -813,10 +828,10 @@ function generateSampleCircuits() {
             traffic: traffic,
             cost: parseFloat(cost),
             contract_status: contractStatuses[Math.floor(Math.random() * contractStatuses.length)],
-            service_type: serviceTypes[Math.floor(Math.random() * serviceTypes.length)],
+            service_type: shouldBeDecomCandidate ? (Math.random() > 0.4 ? 'legacy' : 'modern') : 'modern',
             redundancy: redundancyStatuses[Math.floor(Math.random() * redundancyStatuses.length)],
-            site_status: siteStatuses[Math.floor(Math.random() * siteStatuses.length)],
-            hardware_eol: hardwareEolStatuses[Math.floor(Math.random() * hardwareEolStatuses.length)],
+            site_status: shouldBeDecomCandidate ? (Math.random() > 0.7 ? 'closed' : 'active') : 'active',
+            hardware_eol: shouldBeDecomCandidate ? (Math.random() > 0.7 ? 'yes' : 'no') : 'no',
             provider_status: providerStatuses[Math.floor(Math.random() * providerStatuses.length)],
             status: status,
             comments: comments,
