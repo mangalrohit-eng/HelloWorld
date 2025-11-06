@@ -417,6 +417,14 @@
                 <p>Comprehensive overview of circuit decommissioning metrics</p>
             </div>
 
+            <!-- Sub-tabs for Analytics -->
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" data-subtab="analyticsOverview"><i class="fa-solid fa-chart-pie"></i> Analytics Overview</button>
+                <button class="sub-tab-btn" data-subtab="circuitDetails"><i class="fa-solid fa-table"></i> Circuit Details</button>
+            </div>
+
+            <!-- Sub-tab: Analytics Overview -->
+            <div id="analyticsOverview" class="sub-tab-content active">
             <!-- Export and Filter Controls -->
             <div class="card">
                 <div class="analytics-controls">
@@ -627,6 +635,33 @@
                 <h3>Top Performing Patterns</h3>
                 <div class="chart-container-medium">
                     <canvas id="rulesChart"></canvas>
+                </div>
+            </div>
+            </div>
+
+            <!-- Sub-tab: Circuit Details -->
+            <div id="circuitDetails" class="sub-tab-content">
+                <div class="card">
+                    <h3>Circuit Details Report</h3>
+                    <p style="color: #666666; margin-bottom: 20px;">Detailed view of all circuits with decision history and current status</p>
+                    <div class="table-container" style="overflow-x: auto;">
+                        <table class="circuit-details-table" id="circuitDetailsTable">
+                            <thead>
+                                <tr>
+                                    <th>Circuit ID</th>
+                                    <th>Location</th>
+                                    <th>Date Flagged</th>
+                                    <th>Decision</th>
+                                    <th>Decided By</th>
+                                    <th>Decision Date</th>
+                                    <th>Current Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="circuitDetailsTableBody">
+                                <!-- Circuit details will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </section>

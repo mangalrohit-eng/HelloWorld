@@ -2324,6 +2324,84 @@ function updateAnalyticsDashboard() {
     createServiceTypeChart();
     createTrendChart();
     createRulesChart();
+    renderCircuitDetailsTable();
+}
+
+// Render Circuit Details Table
+function renderCircuitDetailsTable() {
+    const tableBody = document.getElementById('circuitDetailsTableBody');
+    if (!tableBody) return;
+    
+    // Sort circuits by status and date
+    const sortedCircuits = [...circuits].sort((a, b) => {
+        // Prioritize flagged circuits
+        if (a.flagged && !b.flagged) return -1;
+        if (!a.flagged && b.flagged) return 1;
+        return 0;
+    });
+    
+    tableBody.innerHTML = sortedCircuits.map(circuit => {
+        // Determine date flagged (from history or first comment)
+        let dateFlagged = 'N/A';
+        const flaggedEvent = circuit.history?.find(h => h.event === 'flagged');
+        if (flaggedEvent) {
+            dateFlagged = new Date(flaggedEvent.timestamp).toLocaleDateString();
+        } else if (circuit.flagged) {
+            dateFlagged = 'Recently';
+        }
+        
+        // Determine decision and decision maker
+        let decision = 'Pending Review';
+        let decidedBy = '-';
+        let decisionDate = '-';
+        let decisionClass = 'decision-pending';
+        
+        if (circuit.status === 'approved') {
+            decision = 'Approved for Decom';
+            decisionClass = 'decision-approved';
+            const lastComment = circuit.comments[circuit.comments.length - 1];
+            if (lastComment) {
+                decidedBy = lastComment.author || 'Network Engineer';
+                decisionDate = lastComment.date || new Date(lastComment.timestamp).toLocaleDateString();
+            }
+        } else if (circuit.status === 'rejected') {
+            decision = 'Keep Active';
+            decisionClass = 'decision-rejected';
+            const lastComment = circuit.comments[circuit.comments.length - 1];
+            if (lastComment) {
+                decidedBy = lastComment.author || 'Network Engineer';
+                decisionDate = lastComment.date || new Date(lastComment.timestamp).toLocaleDateString();
+            }
+        }
+        
+        // Determine current status
+        let currentStatus = 'Active';
+        let statusClass = 'status-active';
+        
+        if (circuit.status === 'approved') {
+            // Check if sent for decommission (would be in a decommission list)
+            const inDecommissionProcess = false; // We'll need to track this
+            if (inDecommissionProcess) {
+                currentStatus = 'In Process';
+                statusClass = 'status-in-process';
+            } else {
+                currentStatus = 'Active';
+                statusClass = 'status-active';
+            }
+        }
+        
+        return `
+            <tr>
+                <td><strong>${circuit.id}</strong></td>
+                <td>${circuit.location}</td>
+                <td>${dateFlagged}</td>
+                <td><span class="decision-badge ${decisionClass}">${decision}</span></td>
+                <td>${decidedBy}</td>
+                <td>${decisionDate}</td>
+                <td><span class="status-badge ${statusClass}">${currentStatus}</span></td>
+            </tr>
+        `;
+    }).join('');
 }
 
 // Calculate and display cost savings
