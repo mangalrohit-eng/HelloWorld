@@ -4,6 +4,11 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@300;400;500;600;700&display=swap');
 
 body {
@@ -14,6 +19,9 @@ body {
     margin: 0;
     color: #000000;
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: rgba(205, 4, 11, 0.1);
 }
 
 .container {
@@ -1570,7 +1578,11 @@ textarea {
 /* Responsive Design */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 0;
+    }
+
+    .container {
+        padding: 0 16px;
     }
 
     .utility-bar {
@@ -1585,12 +1597,20 @@ textarea {
 
     .utility-left {
         font-size: 0.75rem;
-        gap: 8px;
+        gap: 6px;
         flex-wrap: wrap;
     }
 
     .utility-link {
         font-size: 0.75rem;
+    }
+
+    .utility-divider {
+        font-size: 0.75rem;
+    }
+
+    .user-profile {
+        padding: 4px 8px;
     }
 
     .user-avatar {
@@ -1607,56 +1627,351 @@ textarea {
         font-size: 0.7rem;
     }
 
+    .header {
+        padding: 16px 0;
+    }
+
     .header-content {
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .verizon-logo-svg {
+        height: 20px;
+    }
+
+    .verizon-logo-img {
+        height: 20px;
+    }
+
+    .logo-text {
+        font-size: 1.5rem;
+    }
+
+    .checkmark {
+        font-size: 1.5rem;
+    }
+
+    .header-content h1 {
+        font-size: 1rem;
+        line-height: 1.2;
+    }
+
+    .header-subtitle {
+        font-size: 0.75rem;
+    }
+
+    /* Tabs */
+    .tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        gap: 0;
+        margin: 0;
+    }
+
+    .tab-btn {
+        padding: 14px 16px;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        flex: 0 0 auto;
+        min-width: auto;
+    }
+
+    /* Sub-tabs */
+    .sub-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        margin-bottom: 20px;
+        gap: 8px;
+    }
+
+    .sub-tab-btn {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+
+    /* Content sections */
+    .section-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .section-header p {
+        font-size: 0.875rem;
+    }
+
+    /* Cards */
+    .card {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .card h3 {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+
+    /* Forms */
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        font-size: 0.875rem;
+        margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 0.875rem;
+        padding: 10px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    /* Radio buttons */
+    .radio-label {
+        padding: 12px;
+    }
+
+    .radio-text strong {
+        font-size: 0.9rem;
+    }
+
+    .radio-text small {
+        font-size: 0.8rem;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 12px 20px;
+        font-size: 0.875rem;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    /* Rule items */
+    .rule-item {
+        padding: 14px;
+    }
+
+    .rule-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
 
-    .verizon-logo-svg {
-        height: 24px;
+    .rule-name {
+        font-size: 0.95rem;
     }
 
-    .verizon-logo-img {
-        height: 24px;
+    .rule-condition {
+        font-size: 0.85rem;
     }
 
-    .logo-text {
-        font-size: 1.75rem;
+    .rule-description {
+        font-size: 0.85rem;
     }
 
-    .checkmark {
-        font-size: 1.75rem;
+    /* Circuit items */
+    .circuit-item {
+        padding: 14px;
     }
 
-    .header-content h1 {
-        font-size: 1.25rem;
+    .circuit-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
     }
 
-    .header-subtitle {
-        font-size: 0.8rem;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
+    .circuit-id {
+        font-size: 0.95rem;
     }
 
     .circuit-details {
         grid-template-columns: 1fr;
+        gap: 8px;
     }
 
-    .toolbar {
-        flex-direction: column;
-        gap: 15px;
-        align-items: stretch;
-    }
-
-    .stats {
-        justify-content: space-between;
+    .circuit-detail {
+        font-size: 0.85rem;
     }
 
     .circuit-actions {
         flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    /* Toolbar */
+    .toolbar {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    /* Stats */
+    .stats {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .stat-item {
+        flex: 1 1 45%;
+        min-width: 140px;
+    }
+
+    /* Analytics */
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .metric-card {
+        padding: 16px;
+    }
+
+    .metric-value {
+        font-size: 1.75rem;
+    }
+
+    .metric-label {
+        font-size: 0.85rem;
+    }
+
+    /* Pipeline */
+    .pipeline {
+        padding: 16px;
+    }
+
+    .pipeline-steps {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .pipeline-step {
+        padding: 14px;
+    }
+
+    /* Footer */
+    .main-footer {
+        padding: 32px 16px 16px;
+        margin-top: 40px;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .footer-section h4 {
+        font-size: 1rem;
+    }
+
+    .footer-section p,
+    .footer-links li {
+        font-size: 0.85rem;
+    }
+
+    /* Learning footer */
+    .learning-footer {
+        padding: 12px 16px;
+    }
+
+    .learning-agents {
+        gap: 8px;
+    }
+
+    .agent-icon-small {
+        font-size: 1rem;
+    }
+
+    .agent-status-text {
+        font-size: 0.75rem;
+    }
+
+    .agent-arrow-small {
+        font-size: 0.875rem;
+    }
+
+    /* Decommission list */
+    .decommission-item {
+        padding: 12px;
+    }
+
+    /* Notifications */
+    .notification {
+        max-width: 90%;
+        padding: 12px 16px;
+        font-size: 0.875rem;
+    }
+
+    /* Empty states */
+    .empty-state {
+        padding: 30px 16px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Extra small devices (iPhone SE and similar) */
+@media (max-width: 375px) {
+    .container {
+        padding: 0 12px;
+    }
+
+    .verizon-logo-svg {
+        height: 18px;
+    }
+
+    .header-content h1 {
+        font-size: 0.9rem;
+    }
+
+    .tab-btn {
+        padding: 12px 12px;
+        font-size: 0.8rem;
+    }
+
+    .sub-tab-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+
+    .card {
+        padding: 12px;
+    }
+
+    .btn {
+        padding: 10px 16px;
+        font-size: 0.8rem;
+    }
+
+    .utility-left {
+        font-size: 0.7rem;
+    }
+
+    .utility-link {
+        font-size: 0.7rem;
+    }
+
+    .stat-item {
+        flex: 1 1 100%;
     }
 }
 
