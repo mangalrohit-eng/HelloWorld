@@ -88,7 +88,8 @@ function createDefaultRules() {
                 condition: 'utilization',
                 operator: '<',
                 value: 10,
-                description: 'Critical: Circuits under 10% utilization are strong candidates for immediate decommission'
+                description: 'Critical: Circuits under 10% utilization are strong candidates for immediate decommission',
+                aiGenerated: true
             },
             {
                 id: Date.now() + 6,
@@ -110,7 +111,8 @@ function createDefaultRules() {
                     { condition: 'hardware_eol', operator: '==', value: 'yes' }
                 ],
                 logic: 'OR',
-                description: 'Complex Rule: Circuits at closed sites or with end-of-life hardware should be decommissioned'
+                description: 'Complex Rule: Circuits at closed sites or with end-of-life hardware should be decommissioned',
+                aiGenerated: true
             }
         ];
         
@@ -355,7 +357,7 @@ function initializeRuleForm() {
             <input type="number" id="ruleValue" required placeholder="e.g., 20">
         `;
         
-        showNotification('Rule added successfully!');
+        showNotification('Pattern added successfully!');
     });
 }
 
@@ -605,7 +607,7 @@ function renderRules() {
     const rulesList = document.getElementById('rulesList');
     
     if (rules.length === 0) {
-        rulesList.innerHTML = '<div class="empty-state">No rules defined yet. Add your first rule above.</div>';
+        rulesList.innerHTML = '<div class="empty-state">No patterns defined yet. Add your first pattern above.</div>';
         return;
     }
     
@@ -631,11 +633,16 @@ function renderRules() {
             conditionHTML = `<strong>Condition:</strong> ${getConditionLabel(rule.condition)} ${rule.operator} ${rule.value}`;
         }
         
+        const aiIndicator = rule.aiGenerated ? '<span class="ai-generated-badge" title="AI Generated Pattern"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Generated</span>' : '';
+        
         return `
             <div class="rule-item">
                 <div class="rule-header">
                     <div>
-                        <div class="rule-name">${rule.name}</div>
+                        <div class="rule-name">
+                            ${rule.name}
+                            ${aiIndicator}
+                        </div>
                         <span class="rule-type-badge ${typeClass}">${typeIcon} ${typeLabel}</span>
                     </div>
                     <button class="btn btn-danger" onclick="deleteRule(${rule.id})">Delete</button>
@@ -788,7 +795,7 @@ function generateSampleCircuits() {
 // Run Analysis with AI Agents using Footer Bar
 function runAnalysis() {
     if (rules.length === 0) {
-        alert('Please add at least one rule before running analysis.');
+        alert('Please add at least one pattern before running analysis.');
         return;
     }
     
@@ -840,7 +847,7 @@ function runAnalysisAgent2() {
     const status = document.getElementById('learningStatus2');
     
     agent.classList.add('working');
-    status.textContent = 'Rules Engine Agent applying criteria...';
+    status.textContent = 'Pattern Engine Agent applying criteria...';
     document.getElementById('learningProgressBar').style.width = '35%';
     
     // Reset all circuits
@@ -1153,7 +1160,7 @@ function displaySuggestedRules(suggestedRules) {
                     </div>
                 </div>
                 <button class="btn btn-primary" onclick="addLearnedRule('${rule.patternKey}', '${rule.name.replace(/'/g, "\\'")}', '${rule.description.replace(/'/g, "\\'")}')">
-                    Add Rule
+                    Add Pattern
                 </button>
             </div>
         </div>
@@ -1181,7 +1188,7 @@ function addLearnedRule(patternKey, name, description) {
     renderRules();
     updateAnalytics();
     
-    showNotification(`Exclusion rule "${name}" added successfully!`);
+    showNotification(`Exclusion pattern "${name}" added successfully!`);
 }
 
 // Evaluate Rule
@@ -1322,7 +1329,7 @@ function renderCircuits(circuitsToRender = null) {
             
             ${circuit.flagged && circuit.matchedRules.length > 0 ? `
                 <div class="matched-rules">
-                    <strong><i class="fa-solid fa-triangle-exclamation"></i> Matched Rules:</strong>
+                    <strong><i class="fa-solid fa-triangle-exclamation"></i> Matched Patterns:</strong>
                     <ul>
                         ${circuit.matchedRules.map(ruleName => `<li>${ruleName}</li>`).join('')}
                     </ul>
@@ -2621,11 +2628,11 @@ function generateAnalyticsReport() {
                 </tbody>
             </table>
             
-            <h2>Active Rules</h2>
+            <h2>Active Patterns</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>Rule Name</th>
+                        <th>Pattern Name</th>
                         <th>Type</th>
                         <th>Condition</th>
                     </tr>
@@ -2635,7 +2642,7 @@ function generateAnalyticsReport() {
                         <tr>
                             <td>${r.name}</td>
                             <td>${r.type === 'include' ? 'Include' : 'Exclude'}</td>
-                            <td>${r.conditions ? 'Compound Rule' : getConditionLabel(r.condition) + ' ' + r.operator + ' ' + r.value}</td>
+                            <td>${r.conditions ? 'Compound Pattern' : getConditionLabel(r.condition) + ' ' + r.operator + ' ' + r.value}</td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -2840,11 +2847,11 @@ function generateSmartNotifications() {
     if (unusedRules.length > 0) {
         unusedRules.forEach(rule => {
             const existingNotification = notifications.find(n => 
-                n.message.includes(`Rule "${rule.name}" hasn't matched`) && !n.read
+                n.message.includes(`Pattern "${rule.name}" hasn't matched`) && !n.read
             );
             if (!existingNotification) {
                 addNotification('info', 
-                    `Rule "${rule.name}" hasn't matched any circuits yet`, 
+                    `Pattern "${rule.name}" hasn't matched any circuits yet`, 
                     null
                 );
             }
@@ -2904,8 +2911,8 @@ function initializeCircuitHistory() {
                 circuit.history.push({
                     event: 'flagged',
                     timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(), // Random date in last 30 days
-                    author: 'Rules Engine',
-                    description: `Flagged by rules: ${circuit.matchedRules.join(', ')}`
+                    author: 'Pattern Engine',
+                    description: `Flagged by patterns: ${circuit.matchedRules.join(', ')}`
                 });
             }
             

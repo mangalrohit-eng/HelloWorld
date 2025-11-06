@@ -677,6 +677,51 @@ textarea {
     font-weight: 700;
     font-size: 1.15rem;
     margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ai-generated-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+.ai-generated-badge i {
+    font-size: 0.85rem;
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% {
+        box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    }
+    50% {
+        box-shadow: 0 2px 8px rgba(118, 75, 162, 0.5);
+    }
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-15deg);
+    }
+    75% {
+        transform: rotate(15deg);
+    }
 }
 
 .rule-type-badge {

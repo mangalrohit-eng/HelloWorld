@@ -124,21 +124,21 @@
         <section id="rules" class="tab-content">
             <div class="section-header">
                 <h2>Manage Decommission Criteria</h2>
-                <p>Define rules to identify circuits eligible for decommissioning</p>
+                <p>Define patterns to identify circuits eligible for decommissioning</p>
             </div>
 
             <!-- Sub-tabs for Decom Criteria -->
             <div class="sub-tabs">
-                <button class="sub-tab-btn active" data-subtab="aiRules"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Generated Rules</button>
-                <button class="sub-tab-btn" data-subtab="activeRules"><i class="fa-solid fa-list-check"></i> Active Rules</button>
-                <button class="sub-tab-btn" data-subtab="newRule"><i class="fa-solid fa-plus"></i> Create New Rule</button>
+                <button class="sub-tab-btn active" data-subtab="aiRules"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Generated Patterns</button>
+                <button class="sub-tab-btn" data-subtab="activeRules"><i class="fa-solid fa-list-check"></i> Active Patterns</button>
+                <button class="sub-tab-btn" data-subtab="newRule"><i class="fa-solid fa-plus"></i> Create New Pattern</button>
             </div>
 
             <!-- Sub-tab: AI Generated Rules -->
             <div id="aiRules" class="sub-tab-content active">
                 <div class="card" style="background: #FFF5F5; border-left: 4px solid #CD040B;">
-                    <h3><i class="fa-solid fa-wand-magic-sparkles"></i> AI-Powered Rule Learning</h3>
-                    <p style="color: #666666; margin-bottom: 20px;">Analyze engineer feedback to automatically create exclusion rules from "Keep Active" comments</p>
+                    <h3><i class="fa-solid fa-wand-magic-sparkles"></i> AI-Powered Pattern Learning</h3>
+                    <p style="color: #666666; margin-bottom: 20px;">Analyze engineer feedback to automatically create exclusion patterns from "Keep Active" comments</p>
                     <div style="display: flex; gap: 15px; align-items: center;">
                         <button class="btn btn-secondary" onclick="learnFromFeedback()">
                             <i class="fa-solid fa-brain"></i> Learn from Feedback
@@ -148,7 +148,7 @@
                     </span>
                 </div>
                 <div id="learnedRules" style="margin-top: 20px; display: none;">
-                    <h4 style="color: #CD040B; font-size: 1.1rem; margin-bottom: 10px;">✨ AI-Generated Rules:</h4>
+                    <h4 style="color: #CD040B; font-size: 1.1rem; margin-bottom: 10px;">✨ AI-Generated Patterns:</h4>
                     <div id="suggestedRulesList"></div>
                 </div>
             </div>
@@ -157,9 +157,9 @@
             <!-- Sub-tab: Active Rules -->
             <div id="activeRules" class="sub-tab-content">
                 <div class="card">
-                    <h3>Active Rules</h3>
+                    <h3>Active Patterns</h3>
                     <div id="rulesList" class="rules-list">
-                        <!-- Rules will be populated here -->
+                        <!-- Patterns will be populated here -->
                     </div>
                 </div>
             </div>
@@ -167,28 +167,28 @@
             <!-- Sub-tab: Create New Rule -->
             <div id="newRule" class="sub-tab-content">
                 <div class="card">
-                    <h3>Add New Rule</h3>
+                    <h3>Add New Pattern</h3>
                     <form id="ruleForm">
                     <div class="form-group">
-                        <label for="ruleName">Rule Name *</label>
-                        <input type="text" id="ruleName" required placeholder="e.g., Low Utilization Rule">
+                        <label for="ruleName">Pattern Name *</label>
+                        <input type="text" id="ruleName" required placeholder="e.g., Low Utilization Pattern">
                     </div>
 
                     <div class="form-group">
-                        <label>Rule Type *</label>
+                        <label>Pattern Type *</label>
                         <div class="radio-group">
                             <label class="radio-label">
                                 <input type="radio" name="ruleType" value="include" checked>
                                 <span class="radio-text">
                                     <strong>Include for Decommission</strong>
-                                    <small>Circuits matching this rule will be flagged for decommission</small>
+                                    <small>Circuits matching this pattern will be flagged for decommission</small>
                                 </span>
                             </label>
                             <label class="radio-label">
                                 <input type="radio" name="ruleType" value="exclude">
                                 <span class="radio-text">
                                     <strong>Exclude from Decommission</strong>
-                                    <small>Circuits matching this rule will NOT be flagged (e.g., 911 services)</small>
+                                    <small>Circuits matching this pattern will NOT be flagged (e.g., 911 services)</small>
                                 </span>
                             </label>
                         </div>
@@ -240,7 +240,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Compound Rule Logic</label>
+                        <label>Compound Pattern Logic</label>
                         <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 15px;">
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                                 <input type="radio" name="ruleLogic" value="single" checked>
@@ -270,10 +270,10 @@
 
                     <div class="form-group">
                         <label for="ruleDescription">Description</label>
-                        <textarea id="ruleDescription" rows="3" placeholder="Describe when this rule should flag a circuit..."></textarea>
+                        <textarea id="ruleDescription" rows="3" placeholder="Describe when this pattern should flag a circuit..."></textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">Add Rule</button>
+                    <button type="submit" class="btn btn-primary">Add Pattern</button>
                 </form>
             </div>
             </div>
@@ -538,16 +538,16 @@
                 </div>
             </div>
 
-            <!-- Rules Summary -->
+            <!-- Patterns Summary -->
             <div class="card">
-                <h3>Rules Summary</h3>
+                <h3>Patterns Summary</h3>
                 <div class="rules-summary">
                     <div class="summary-item">
-                        <span class="summary-label">Active Rules:</span>
+                        <span class="summary-label">Active Patterns:</span>
                         <span class="summary-value" id="analytics-rules">0</span>
                     </div>
                     <div class="summary-item">
-                        <span class="summary-label">Most Matched Rule:</span>
+                        <span class="summary-label">Most Matched Pattern:</span>
                         <span class="summary-value" id="analytics-top-rule">N/A</span>
                     </div>
                 </div>
@@ -619,9 +619,9 @@
                 </div>
             </div>
 
-            <!-- Top Rules Performance -->
+            <!-- Top Patterns Performance -->
             <div class="card">
-                <h3>Top Performing Rules</h3>
+                <h3>Top Performing Patterns</h3>
                 <div class="chart-container-medium">
                     <canvas id="rulesChart"></canvas>
                 </div>
