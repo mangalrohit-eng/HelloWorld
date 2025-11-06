@@ -204,12 +204,67 @@ function generateSampleCircuits() {
     saveData();
 }
 
-// Run Analysis
+// Run Analysis with AI Agents
 function runAnalysis() {
     if (rules.length === 0) {
         alert('Please add at least one rule before running analysis.');
         return;
     }
+    
+    // Show agents modal
+    showAgentsModal();
+}
+
+// Show AI Agents Modal
+function showAgentsModal() {
+    const modal = document.getElementById('agentsModal');
+    modal.classList.add('active');
+    
+    // Reset all agents
+    for (let i = 1; i <= 4; i++) {
+        const agent = document.getElementById(`agent${i}`);
+        agent.classList.remove('working', 'completed');
+        document.getElementById(`progress${i}`).style.width = '0%';
+        document.getElementById(`progress-text${i}`).textContent = i === 1 ? 'Initializing...' : 'Waiting...';
+    }
+    document.getElementById('agentsSummary').style.display = 'none';
+    
+    // Start agent sequence
+    setTimeout(() => runAgent1(), 500);
+}
+
+// Agent 1: Data Retrieval
+function runAgent1() {
+    const agent1 = document.getElementById('agent1');
+    agent1.classList.add('working');
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 5;
+        document.getElementById('progress1').style.width = progress + '%';
+        
+        if (progress === 30) {
+            document.getElementById('progress-text1').textContent = `Fetching circuits...`;
+        } else if (progress === 60) {
+            document.getElementById('progress-text1').textContent = `Loading ${circuits.length} circuits`;
+        } else if (progress === 90) {
+            document.getElementById('progress-text1').textContent = 'Data retrieved!';
+        }
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            agent1.classList.remove('working');
+            agent1.classList.add('completed');
+            document.getElementById('progress-text1').textContent = `✓ ${circuits.length} circuits loaded`;
+            setTimeout(() => runAgent2(), 500);
+        }
+    }, 80);
+}
+
+// Agent 2: Rules Engine
+function runAgent2() {
+    const agent2 = document.getElementById('agent2');
+    agent2.classList.add('working');
     
     // Reset all circuits
     circuits.forEach(circuit => {
@@ -217,21 +272,126 @@ function runAnalysis() {
         circuit.matchedRules = [];
     });
     
-    // Apply rules
-    circuits.forEach(circuit => {
-        rules.forEach(rule => {
-            if (evaluateRule(circuit, rule)) {
-                circuit.flagged = true;
-                circuit.matchedRules.push(rule.name);
-            }
-        });
-    });
+    let progress = 0;
+    let processedRules = 0;
+    const interval = setInterval(() => {
+        progress += 5;
+        document.getElementById('progress2').style.width = progress + '%';
+        
+        if (progress <= 90) {
+            processedRules = Math.floor((progress / 100) * rules.length);
+            document.getElementById('progress-text2').textContent = `Applying rule ${Math.min(processedRules + 1, rules.length)} of ${rules.length}`;
+        } else {
+            document.getElementById('progress-text2').textContent = 'Rules applied!';
+        }
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            
+            // Actually apply rules
+            circuits.forEach(circuit => {
+                rules.forEach(rule => {
+                    if (evaluateRule(circuit, rule)) {
+                        circuit.flagged = true;
+                        circuit.matchedRules.push(rule.name);
+                    }
+                });
+            });
+            
+            const flaggedCount = circuits.filter(c => c.flagged).length;
+            agent2.classList.remove('working');
+            agent2.classList.add('completed');
+            document.getElementById('progress-text2').textContent = `✓ ${flaggedCount} circuits flagged`;
+            setTimeout(() => runAgent3(), 500);
+        }
+    }, 70);
+}
+
+// Agent 3: Validation
+function runAgent3() {
+    const agent3 = document.getElementById('agent3');
+    agent3.classList.add('working');
     
-    saveData();
-    renderCircuits();
-    updateStats();
-    updateAnalytics();
-    showNotification('Analysis completed!');
+    const flaggedCircuits = circuits.filter(c => c.flagged);
+    let progress = 0;
+    let validated = 0;
+    
+    const interval = setInterval(() => {
+        progress += 5;
+        document.getElementById('progress3').style.width = progress + '%';
+        
+        if (progress <= 90) {
+            validated = Math.floor((progress / 100) * flaggedCircuits.length);
+            document.getElementById('progress-text3').textContent = `Validating ${Math.min(validated + 1, flaggedCircuits.length)} of ${flaggedCircuits.length}`;
+        } else {
+            document.getElementById('progress-text3').textContent = 'Validation complete!';
+        }
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            agent3.classList.remove('working');
+            agent3.classList.add('completed');
+            document.getElementById('progress-text3').textContent = `✓ ${flaggedCircuits.length} circuits validated`;
+            setTimeout(() => runAgent4(), 500);
+        }
+    }, 60);
+}
+
+// Agent 4: Output
+function runAgent4() {
+    const agent4 = document.getElementById('agent4');
+    agent4.classList.add('working');
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 5;
+        document.getElementById('progress4').style.width = progress + '%';
+        
+        if (progress === 40) {
+            document.getElementById('progress-text4').textContent = 'Preparing results...';
+        } else if (progress === 70) {
+            document.getElementById('progress-text4').textContent = 'Updating dashboard...';
+        } else if (progress === 90) {
+            document.getElementById('progress-text4').textContent = 'Finalizing...';
+        }
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            agent4.classList.remove('working');
+            agent4.classList.add('completed');
+            document.getElementById('progress-text4').textContent = '✓ Results delivered';
+            
+            // Save and update
+            saveData();
+            renderCircuits();
+            updateStats();
+            updateAnalytics();
+            
+            // Show summary
+            setTimeout(() => showAgentsSummary(), 500);
+        }
+    }, 50);
+}
+
+// Show Agents Summary
+function showAgentsSummary() {
+    const flaggedCount = circuits.filter(c => c.flagged).length;
+    const summaryText = document.getElementById('summaryText');
+    summaryText.textContent = `Analyzed ${circuits.length} circuits using ${rules.length} rules. Found ${flaggedCount} circuits eligible for decommission.`;
+    
+    document.getElementById('agentsSummary').style.display = 'block';
+    
+    // Auto-close modal after 3 seconds
+    setTimeout(() => {
+        closeAgentsModal();
+        showNotification('Analysis completed!');
+    }, 3000);
+}
+
+// Close Agents Modal
+function closeAgentsModal() {
+    const modal = document.getElementById('agentsModal');
+    modal.classList.remove('active');
 }
 
 // Evaluate Rule

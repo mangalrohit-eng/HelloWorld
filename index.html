@@ -13,7 +13,7 @@
             <div class="header-content">
                 <div class="logo-section">
                     <svg class="verizon-logo" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
-                        <text x="10" y="35" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#000000">Verizon</text>
+                        <text x="10" y="35" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#FFFFFF">Verizon</text>
                         <rect x="0" y="40" width="120" height="4" fill="#CD040B"/>
                     </svg>
                 </div>
@@ -24,14 +24,122 @@
 
         <!-- Navigation Tabs -->
         <nav class="tabs">
-            <button class="tab-btn active" data-tab="analytics">Analytics</button>
-            <button class="tab-btn" data-tab="rules">Heuristic Rules</button>
+            <button class="tab-btn active" data-tab="rules">Heuristic Rules</button>
             <button class="tab-btn" data-tab="review">Circuit Review</button>
             <button class="tab-btn" data-tab="decommission">Decommission</button>
+            <button class="tab-btn" data-tab="analytics">Analytics</button>
         </nav>
 
+        <!-- Rules Management Section -->
+        <section id="rules" class="tab-content active">
+            <div class="section-header">
+                <h2>Manage Heuristic Rules</h2>
+                <p>Define rules to identify circuits eligible for decommissioning</p>
+            </div>
+
+            <div class="card">
+                <h3>Add New Rule</h3>
+                <form id="ruleForm">
+                    <div class="form-group">
+                        <label for="ruleName">Rule Name *</label>
+                        <input type="text" id="ruleName" required placeholder="e.g., Low Utilization Rule">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ruleCondition">Condition Type *</label>
+                        <select id="ruleCondition" required>
+                            <option value="">Select condition...</option>
+                            <option value="utilization">Utilization Percentage</option>
+                            <option value="bandwidth">Bandwidth Threshold</option>
+                            <option value="age">Circuit Age (months)</option>
+                            <option value="traffic">Traffic Volume</option>
+                            <option value="cost">Cost per Mbps</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ruleOperator">Operator *</label>
+                            <select id="ruleOperator" required>
+                                <option value="<">Less than</option>
+                                <option value="<=">Less than or equal</option>
+                                <option value=">">Greater than</option>
+                                <option value=">=">Greater than or equal</option>
+                                <option value="==">Equal to</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ruleValue">Threshold Value *</label>
+                            <input type="number" id="ruleValue" required placeholder="e.g., 20">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ruleDescription">Description</label>
+                        <textarea id="ruleDescription" rows="3" placeholder="Describe when this rule should flag a circuit..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Add Rule</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Active Rules</h3>
+                <div id="rulesList" class="rules-list">
+                    <!-- Rules will be populated here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Circuit Review Section -->
+        <section id="review" class="tab-content">
+            <div class="section-header">
+                <h2>Review Flagged Circuits</h2>
+                <p>Review circuits identified for decommissioning and add comments</p>
+            </div>
+
+            <div class="card">
+                <div class="toolbar">
+                    <button class="btn btn-secondary" onclick="runAnalysis()">🔍 Run Analysis</button>
+                    <div class="stats">
+                        <span class="stat-badge" id="totalCircuits">0 Circuits</span>
+                        <span class="stat-badge flagged" id="flaggedCircuits">0 Flagged</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="circuitsList" class="circuits-list">
+                <!-- Circuits will be populated here -->
+            </div>
+        </section>
+
+        <!-- Decommission Section -->
+        <section id="decommission" class="tab-content">
+            <div class="section-header">
+                <h2>Send Circuits for Decommission</h2>
+                <p>Approved circuits ready to be decommissioned</p>
+            </div>
+
+            <div class="card">
+                <div class="decommission-toolbar">
+                    <div class="decommission-stats">
+                        <span class="stat-badge" id="pendingDecommission">0 Pending</span>
+                        <span class="stat-badge" id="processedDecommission">0 In Process</span>
+                    </div>
+                    <button class="btn btn-primary" id="sendDecommissionBtn" onclick="sendForDecommission()">
+                        📤 Send Selected for Decommission
+                    </button>
+                </div>
+            </div>
+
+            <div id="decommissionList" class="decommission-list">
+                <!-- Approved circuits will be populated here -->
+            </div>
+        </section>
+
         <!-- Analytics Section -->
-        <section id="analytics" class="tab-content active">
+        <section id="analytics" class="tab-content">
             <div class="section-header">
                 <h2>Analytics Dashboard</h2>
                 <p>Comprehensive overview of circuit decommissioning metrics</p>
@@ -168,114 +276,102 @@
                 </div>
             </div>
         </section>
+    </div>
 
-        <!-- Rules Management Section -->
-        <section id="rules" class="tab-content">
-            <div class="section-header">
-                <h2>Manage Heuristic Rules</h2>
-                <p>Define rules to identify circuits eligible for decommissioning</p>
+    <!-- AI Agents Modal -->
+    <div id="agentsModal" class="agents-modal">
+        <div class="agents-container">
+            <div class="agents-header">
+                <h2>🤖 AI Agents Processing</h2>
+                <p>Multi-agent system analyzing circuit data</p>
             </div>
 
-            <div class="card">
-                <h3>Add New Rule</h3>
-                <form id="ruleForm">
-                    <div class="form-group">
-                        <label for="ruleName">Rule Name *</label>
-                        <input type="text" id="ruleName" required placeholder="e.g., Low Utilization Rule">
+            <div class="agents-pipeline">
+                <!-- Agent 1 -->
+                <div class="agent-card" id="agent1">
+                    <div class="agent-status">
+                        <div class="agent-icon">🔍</div>
+                        <div class="agent-spinner"></div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="ruleCondition">Condition Type *</label>
-                        <select id="ruleCondition" required>
-                            <option value="">Select condition...</option>
-                            <option value="utilization">Utilization Percentage</option>
-                            <option value="bandwidth">Bandwidth Threshold</option>
-                            <option value="age">Circuit Age (months)</option>
-                            <option value="traffic">Traffic Volume</option>
-                            <option value="cost">Cost per Mbps</option>
-                        </select>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="ruleOperator">Operator *</label>
-                            <select id="ruleOperator" required>
-                                <option value="<">Less than</option>
-                                <option value="<=">Less than or equal</option>
-                                <option value=">">Greater than</option>
-                                <option value=">=">Greater than or equal</option>
-                                <option value="==">Equal to</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="ruleValue">Threshold Value *</label>
-                            <input type="number" id="ruleValue" required placeholder="e.g., 20">
+                    <div class="agent-info">
+                        <h3>Data Retrieval Agent</h3>
+                        <p class="agent-description">Fetching all active circuits from network database</p>
+                        <div class="agent-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress1"></div>
+                            </div>
+                            <span class="progress-text" id="progress-text1">Initializing...</span>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="ruleDescription">Description</label>
-                        <textarea id="ruleDescription" rows="3" placeholder="Describe when this rule should flag a circuit..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Add Rule</button>
-                </form>
-            </div>
-
-            <div class="card">
-                <h3>Active Rules</h3>
-                <div id="rulesList" class="rules-list">
-                    <!-- Rules will be populated here -->
                 </div>
-            </div>
-        </section>
 
-        <!-- Circuit Review Section -->
-        <section id="review" class="tab-content">
-            <div class="section-header">
-                <h2>Review Flagged Circuits</h2>
-                <p>Review circuits identified for decommissioning and add comments</p>
-            </div>
+                <div class="agent-arrow">↓</div>
 
-            <div class="card">
-                <div class="toolbar">
-                    <button class="btn btn-secondary" onclick="runAnalysis()">🔍 Run Analysis</button>
-                    <div class="stats">
-                        <span class="stat-badge" id="totalCircuits">0 Circuits</span>
-                        <span class="stat-badge flagged" id="flaggedCircuits">0 Flagged</span>
+                <!-- Agent 2 -->
+                <div class="agent-card" id="agent2">
+                    <div class="agent-status">
+                        <div class="agent-icon">⚙️</div>
+                        <div class="agent-spinner"></div>
+                    </div>
+                    <div class="agent-info">
+                        <h3>Rules Engine Agent</h3>
+                        <p class="agent-description">Applying heuristic rules to identify decommission candidates</p>
+                        <div class="agent-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress2"></div>
+                            </div>
+                            <span class="progress-text" id="progress-text2">Waiting...</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="circuitsList" class="circuits-list">
-                <!-- Circuits will be populated here -->
-            </div>
-        </section>
+                <div class="agent-arrow">↓</div>
 
-        <!-- Decommission Section -->
-        <section id="decommission" class="tab-content">
-            <div class="section-header">
-                <h2>Send Circuits for Decommission</h2>
-                <p>Approved circuits ready to be decommissioned</p>
-            </div>
-
-            <div class="card">
-                <div class="decommission-toolbar">
-                    <div class="decommission-stats">
-                        <span class="stat-badge" id="pendingDecommission">0 Pending</span>
-                        <span class="stat-badge" id="processedDecommission">0 In Process</span>
+                <!-- Agent 3 -->
+                <div class="agent-card" id="agent3">
+                    <div class="agent-status">
+                        <div class="agent-icon">✓</div>
+                        <div class="agent-spinner"></div>
                     </div>
-                    <button class="btn btn-primary" id="sendDecommissionBtn" onclick="sendForDecommission()">
-                        📤 Send Selected for Decommission
-                    </button>
+                    <div class="agent-info">
+                        <h3>Validation Agent</h3>
+                        <p class="agent-description">Double-checking results and validating rule matches</p>
+                        <div class="agent-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress3"></div>
+                            </div>
+                            <span class="progress-text" id="progress-text3">Waiting...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="agent-arrow">↓</div>
+
+                <!-- Agent 4 -->
+                <div class="agent-card" id="agent4">
+                    <div class="agent-status">
+                        <div class="agent-icon">📤</div>
+                        <div class="agent-spinner"></div>
+                    </div>
+                    <div class="agent-info">
+                        <h3>Output Agent</h3>
+                        <p class="agent-description">Preparing and delivering results to dashboard</p>
+                        <div class="agent-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress4"></div>
+                            </div>
+                            <span class="progress-text" id="progress-text4">Waiting...</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div id="decommissionList" class="decommission-list">
-                <!-- Approved circuits will be populated here -->
+            <div class="agents-summary" id="agentsSummary" style="display: none;">
+                <div class="summary-icon">✅</div>
+                <h3>Analysis Complete!</h3>
+                <p id="summaryText">AI agents have successfully processed all circuits</p>
             </div>
-        </section>
+        </div>
     </div>
 
     <script src="app.js"></script>
