@@ -731,6 +731,16 @@ function generateSampleCircuits() {
             });
         }
         
+        // Mark 5 specific circuits as approved for decommissioning
+        if ([4, 6, 8, 11, 13].includes(i)) {
+            status = 'approved';
+            comments.push({
+                text: 'Approved for decommission - Low utilization and redundant capacity available at nearby site',
+                author: 'Senior Network Engineer',
+                timestamp: new Date().toISOString()
+            });
+        }
+        
         circuits.push({
             id: circuitId,
             location: cities[i - 1] || `Location ${i}`,
