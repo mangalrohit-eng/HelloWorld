@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderDecommissionList();
     updateDecommissionStats();
     updateAnalytics();
+    updateFeedbackCount();
 });
 
 // Tab Navigation
@@ -394,6 +395,164 @@ function closeAgentsModal() {
     modal.classList.remove('active');
 }
 
+// Update Feedback Count
+function updateFeedbackCount() {
+    const rejectedCircuits = circuits.filter(c => c.status === 'rejected' && c.comments.length > 0);
+    const count = rejectedCircuits.length;
+    document.getElementById('feedbackCount').textContent = `${count} rejection comment${count !== 1 ? 's' : ''} available`;
+}
+
+// Learn from Feedback - AI-Powered Rule Generation
+function learnFromFeedback() {
+    const rejectedCircuits = circuits.filter(c => c.status === 'rejected' && c.comments.length > 0);
+    
+    if (rejectedCircuits.length === 0) {
+        alert('No rejection feedback available. Please review and reject some circuits first.');
+        return;
+    }
+    
+    showNotification('AI analyzing engineer feedback...');
+    
+    // Simulate AI processing delay
+    setTimeout(() => {
+        const suggestedRules = analyzeRejectionReasons(rejectedCircuits);
+        displaySuggestedRules(suggestedRules);
+        showNotification(`AI generated ${suggestedRules.length} rule suggestions!`);
+    }, 1500);
+}
+
+// Analyze Rejection Reasons with AI
+function analyzeRejectionReasons(rejectedCircuits) {
+    const suggestedRules = [];
+    const patterns = {
+        '911': {
+            keywords: ['911', 'emergency', 'e911'],
+            ruleName: '911/Emergency Services Exclusion',
+            description: 'Exclude circuits handling emergency services'
+        },
+        'critical': {
+            keywords: ['critical', 'mission critical', 'essential', 'vital', 'crucial'],
+            ruleName: 'Critical Infrastructure Exclusion',
+            description: 'Exclude circuits marked as critical infrastructure'
+        },
+        'backup': {
+            keywords: ['backup', 'redundancy', 'failover', 'secondary'],
+            ruleName: 'Backup Circuit Exclusion',
+            description: 'Exclude backup and redundancy circuits'
+        },
+        'customer': {
+            keywords: ['customer', 'client', 'contract', 'sla'],
+            ruleName: 'Active Customer Circuit Exclusion',
+            description: 'Exclude circuits with active customer contracts'
+        },
+        'high priority': {
+            keywords: ['high priority', 'priority', 'important', 'vip'],
+            ruleName: 'High Priority Circuit Exclusion',
+            description: 'Exclude high priority circuits'
+        },
+        'recent': {
+            keywords: ['new', 'recent', 'recently installed', 'just added', 'just installed'],
+            ruleName: 'Recently Installed Exclusion',
+            description: 'Exclude circuits installed within last 6 months'
+        },
+        'government': {
+            keywords: ['government', 'federal', 'state', 'military', 'defense'],
+            ruleName: 'Government Services Exclusion',
+            description: 'Exclude government and military circuits'
+        },
+        'hospital': {
+            keywords: ['hospital', 'healthcare', 'medical', 'health'],
+            ruleName: 'Healthcare Services Exclusion',
+            description: 'Exclude circuits serving healthcare facilities'
+        }
+    };
+    
+    // Analyze each rejection comment
+    const foundPatterns = new Set();
+    rejectedCircuits.forEach(circuit => {
+        circuit.comments.forEach(comment => {
+            const commentLower = comment.text.toLowerCase();
+            
+            Object.entries(patterns).forEach(([key, pattern]) => {
+                const matchFound = pattern.keywords.some(keyword => 
+                    commentLower.includes(keyword.toLowerCase())
+                );
+                
+                if (matchFound && !foundPatterns.has(key)) {
+                    foundPatterns.add(key);
+                    suggestedRules.push({
+                        id: Date.now() + Math.random(),
+                        patternKey: key,
+                        name: pattern.ruleName,
+                        description: pattern.description,
+                        matchedComments: 1,
+                        example: comment.text.substring(0, 100) + (comment.text.length > 100 ? '...' : '')
+                    });
+                }
+            });
+        });
+    });
+    
+    return suggestedRules;
+}
+
+// Display Suggested Rules
+function displaySuggestedRules(suggestedRules) {
+    const container = document.getElementById('learnedRules');
+    const list = document.getElementById('suggestedRulesList');
+    
+    if (suggestedRules.length === 0) {
+        list.innerHTML = '<p style="color: #666666;">No patterns detected. Try adding more specific rejection comments.</p>';
+        container.style.display = 'block';
+        return;
+    }
+    
+    list.innerHTML = suggestedRules.map(rule => `
+        <div style="background: white; padding: 20px; margin-bottom: 15px; border: 2px solid #CCCCCC; border-left: 4px solid #CD040B;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                <div style="flex: 1;">
+                    <h5 style="color: #000000; font-size: 1.1rem; margin-bottom: 8px; font-weight: 700;">
+                        ${rule.name}
+                    </h5>
+                    <p style="color: #666666; font-size: 0.9rem; margin-bottom: 10px;">
+                        ${rule.description}
+                    </p>
+                    <div style="background: #F6F6F6; padding: 10px; border-left: 3px solid #000000; font-size: 0.85rem; color: #333333; font-style: italic;">
+                        <strong>Example feedback:</strong> "${rule.example}"
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addLearnedRule('${rule.patternKey}', '${rule.name.replace(/'/g, "\\'")}', '${rule.description.replace(/'/g, "\\'")}')">
+                    Add Rule
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    container.style.display = 'block';
+}
+
+// Add Learned Rule
+function addLearnedRule(patternKey, name, description) {
+    // Create exclusion rule based on pattern
+    const rule = {
+        id: Date.now(),
+        name: name,
+        condition: 'tags', // Special condition for tag-based rules
+        operator: 'excludes',
+        value: patternKey,
+        description: description,
+        isExclusion: true,
+        aiGenerated: true
+    };
+    
+    rules.push(rule);
+    saveData();
+    renderRules();
+    updateAnalytics();
+    
+    showNotification(`Rule "${name}" added successfully!`);
+}
+
 // Evaluate Rule
 function evaluateRule(circuit, rule) {
     const circuitValue = circuit[rule.condition];
@@ -556,6 +715,7 @@ function rejectDecommission(circuitId) {
     renderDecommissionList();
     updateDecommissionStats();
     updateAnalytics();
+    updateFeedbackCount();
     showNotification(`Circuit ${circuitId} will remain active.`);
 }
 

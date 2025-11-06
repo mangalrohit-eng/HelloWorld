@@ -90,6 +90,23 @@
                     <!-- Rules will be populated here -->
                 </div>
             </div>
+
+            <div class="card" style="background: #FFF5F5; border-left: 4px solid #CD040B;">
+                <h3>🤖 AI-Powered Rule Learning</h3>
+                <p style="color: #666666; margin-bottom: 20px;">Analyze engineer feedback to automatically create exclusion rules from "Keep Active" comments</p>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <button class="btn btn-secondary" onclick="learnFromFeedback()">
+                        🧠 Learn from Feedback
+                    </button>
+                    <span id="feedbackCount" style="color: #666666; font-size: 0.9rem;">
+                        0 rejection comments available
+                    </span>
+                </div>
+                <div id="learnedRules" style="margin-top: 20px; display: none;">
+                    <h4 style="color: #CD040B; font-size: 1.1rem; margin-bottom: 10px;">✨ AI-Generated Rules:</h4>
+                    <div id="suggestedRulesList"></div>
+                </div>
+            </div>
         </section>
 
         <!-- Circuit Review Section -->
