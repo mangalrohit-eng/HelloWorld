@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
     generateSampleCircuits();
     initializeCircuitHistory();
     initializeNotificationSystem();
-    renderCircuits();
+    showInitialCircuitPrompt(); // Show prompt instead of circuits
     updateStats();
     renderDecommissionList();
     updateDecommissionStats();
@@ -1261,6 +1261,43 @@ let filteredCircuits = [];
 // Initialize filtered circuits with all circuits
 function initializeFilteredCircuits() {
     filteredCircuits = circuits;
+}
+
+// Show initial prompt before analysis is run
+function showInitialCircuitPrompt() {
+    const circuitsList = document.getElementById('circuitsList');
+    circuitsList.innerHTML = `
+        <div class="card" style="text-align: center; padding: 60px 40px; background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);">
+            <div style="font-size: 4rem; margin-bottom: 20px; color: #CD040B;">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <h3 style="color: #000000; margin-bottom: 15px; font-size: 1.5rem;">Ready to Analyze Circuits</h3>
+            <p style="color: #718096; font-size: 1.1rem; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                Click <strong>"Run Analysis"</strong> in the top right to apply your decommission patterns and identify circuits for review.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 30px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; color: #CD040B; margin-bottom: 10px;">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <div style="color: #000000; font-weight: 600; margin-bottom: 5px;">
+                        ${rules.length} Active Patterns
+                    </div>
+                    <div style="color: #718096; font-size: 0.9rem;">Ready to apply</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; color: #CD040B; margin-bottom: 10px;">
+                        <i class="fa-solid fa-network-wired"></i>
+                    </div>
+                    <div style="color: #000000; font-weight: 600; margin-bottom: 5px;">
+                        ${circuits.length} Total Circuits
+                    </div>
+                    <div style="color: #718096; font-size: 0.9rem;">To be analyzed</div>
+                </div>
+            </div>
+        </div>
+    `;
+    updateFilterCount(0, 0); // Reset filter count
 }
 
 // Render Circuits
