@@ -297,23 +297,216 @@ function initializeRuleForm() {
 
 // Add condition to compound rule
 function addConditionToRule() {
-    // Create a simple prompt-based UI for now
-    const conditionType = prompt('Condition Type:\n1. utilization\n2. age\n3. service_type\n4. contract_status\n5. site_status\n6. hardware_eol\n\nEnter condition:');
-    if (!conditionType) return;
+    const list = document.getElementById('conditionsList');
     
-    const operator = prompt('Operator:\n==, !=, <, <=, >, >=\n\nEnter operator:');
-    if (!operator) return;
+    // Create inline form
+    const formHTML = `
+        <div id="newConditionForm" style="padding: 16px; background: #FFF5F5; border: 2px solid #CD040B; border-radius: 8px; margin-bottom: 10px;">
+            <h4 style="margin: 0 0 12px 0; color: #000000;">Add Condition</h4>
+            <div style="display: grid; gap: 12px;">
+                <div>
+                    <label style="display: block; margin-bottom: 6px; font-weight: 500;">Condition Type:</label>
+                    <select id="newConditionType" style="width: 100%; padding: 8px; border: 1px solid #E0E0E0; border-radius: 4px;">
+                        <optgroup label="Performance Metrics">
+                            <option value="utilization">Utilization Percentage</option>
+                            <option value="bandwidth">Bandwidth Threshold</option>
+                            <option value="traffic">Traffic Volume</option>
+                        </optgroup>
+                        <optgroup label="Cost & Age">
+                            <option value="age">Circuit Age</option>
+                            <option value="cost">Cost per Mbps</option>
+                        </optgroup>
+                        <optgroup label="Service Status">
+                            <option value="contract_status">Contract Status</option>
+                            <option value="service_type">Service Type</option>
+                            <option value="redundancy">Redundancy Status</option>
+                        </optgroup>
+                        <optgroup label="Business & Technical">
+                            <option value="site_status">Site/Facility Status</option>
+                            <option value="hardware_eol">Hardware EOL/EOS</option>
+                            <option value="provider_status">Provider/Carrier Status</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 500;">Operator:</label>
+                        <select id="newConditionOperator" style="width: 100%; padding: 8px; border: 1px solid #E0E0E0; border-radius: 4px;">
+                            <option value="<">Less than</option>
+                            <option value="<=">Less than or equal</option>
+                            <option value=">">Greater than</option>
+                            <option value=">=">Greater than or equal</option>
+                            <option value="==">Equal to</option>
+                            <option value="!=">Not equal to</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 500;">Value:</label>
+                        <input type="text" id="newConditionValue" placeholder="Enter value" style="width: 100%; padding: 8px; border: 1px solid #E0E0E0; border-radius: 4px;">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" onclick="cancelAddCondition()" class="btn btn-secondary" style="padding: 8px 16px;">Cancel</button>
+                    <button type="button" onclick="saveNewCondition()" class="btn btn-primary" style="padding: 8px 16px;">Add</button>
+                </div>
+            </div>
+        </div>
+    `;
     
-    const value = prompt('Enter value:');
-    if (!value) return;
+    // Check if form already exists
+    if (document.getElementById('newConditionForm')) {
+        return; // Form already open
+    }
+    
+    // Insert form at the beginning
+    list.insertAdjacentHTML('afterbegin', formHTML);
+    
+    // Add dynamic behavior to the new form
+    const newConditionType = document.getElementById('newConditionType');
+    const newConditionOperator = document.getElementById('newConditionOperator');
+    const newConditionValue = document.getElementById('newConditionValue');
+    
+    const conditionConfig = {
+        // Numeric conditions
+        'utilization': { type: 'numeric', operators: ['<', '<=', '>', '>=', '==', '!='] },
+        'bandwidth': { type: 'numeric', operators: ['<', '<=', '>', '>=', '==', '!='] },
+        'traffic': { type: 'numeric', operators: ['<', '<=', '>', '>=', '==', '!='] },
+        'age': { type: 'numeric', operators: ['<', '<=', '>', '>=', '==', '!='] },
+        'cost': { type: 'numeric', operators: ['<', '<=', '>', '>=', '==', '!='] },
+        // Text-based conditions
+        'contract_status': { 
+            type: 'select', 
+            operators: ['==', '!='],
+            options: [
+                { value: 'active', label: 'Active' },
+                { value: 'expired', label: 'Expired' },
+                { value: 'expiring_soon', label: 'Expiring Soon' }
+            ]
+        },
+        'service_type': { 
+            type: 'select', 
+            operators: ['==', '!='],
+            options: [
+                { value: 'legacy', label: 'Legacy' },
+                { value: 'modern', label: 'Modern' },
+                { value: 'fiber', label: 'Fiber' },
+                { value: 'copper', label: 'Copper' }
+            ]
+        },
+        'redundancy': { 
+            type: 'select', 
+            operators: ['==', '!='],
+            options: [
+                { value: 'yes', label: 'Yes' },
+                { value: 'no', label: 'No' },
+                { value: 'partial', label: 'Partial' }
+            ]
+        },
+        'site_status': { 
+            type: 'select', 
+            operators: ['==', '!='],
+            options: [
+                { value: 'active', label: 'Active' },
+                { value: 'closed', label: 'Closed' },
+                { value: 'relocated', label: 'Relocated' }
+            ]
+        },
+        'hardware_eol': { 
+            type: 'select', 
+            operators: ['==', '!='],
+            options: [
+                { value: 'yes', label: 'Yes' },
+                { value: 'no', label: 'No' },
+                { value: 'approaching', label: 'Approaching' }
+            ]
+        },
+        'provider_status': { 
+            type: 'select', 
+            operators: ['==', '!='],
+            options: [
+                { value: 'active', label: 'Active' },
+                { value: 'migrated', label: 'Migrated' },
+                { value: 'terminated', label: 'Terminated' }
+            ]
+        }
+    };
+    
+    newConditionType.addEventListener('change', function() {
+        const condition = this.value;
+        const config = conditionConfig[condition];
+        
+        if (!config) return;
+        
+        // Update operators
+        const operatorLabels = {
+            '<': 'Less than',
+            '<=': 'Less than or equal',
+            '>': 'Greater than',
+            '>=': 'Greater than or equal',
+            '==': 'Equal to',
+            '!=': 'Not equal to'
+        };
+        
+        newConditionOperator.innerHTML = '';
+        config.operators.forEach(op => {
+            const option = document.createElement('option');
+            option.value = op;
+            option.textContent = operatorLabels[op] || op;
+            newConditionOperator.appendChild(option);
+        });
+        
+        // Update value input
+        const valueContainer = newConditionValue.parentElement;
+        if (config.type === 'numeric') {
+            valueContainer.innerHTML = `
+                <label style="display: block; margin-bottom: 6px; font-weight: 500;">Value:</label>
+                <input type="number" id="newConditionValue" placeholder="Enter value" style="width: 100%; padding: 8px; border: 1px solid #E0E0E0; border-radius: 4px;">
+            `;
+        } else if (config.type === 'select') {
+            const optionsHTML = config.options.map(opt => 
+                `<option value="${opt.value}">${opt.label}</option>`
+            ).join('');
+            valueContainer.innerHTML = `
+                <label style="display: block; margin-bottom: 6px; font-weight: 500;">Value:</label>
+                <select id="newConditionValue" style="width: 100%; padding: 8px; border: 1px solid #E0E0E0; border-radius: 4px;">
+                    ${optionsHTML}
+                </select>
+            `;
+        }
+    });
+}
+
+// Save new condition from inline form
+function saveNewCondition() {
+    const conditionType = document.getElementById('newConditionType').value;
+    const operator = document.getElementById('newConditionOperator').value;
+    const valueInput = document.getElementById('newConditionValue').value;
+    
+    if (!valueInput) {
+        alert('Please enter a value');
+        return;
+    }
+    
+    const value = isNaN(valueInput) ? valueInput : parseFloat(valueInput);
     
     const condition = {
         condition: conditionType,
         operator: operator,
-        value: isNaN(value) ? value : parseFloat(value)
+        value: value
     };
     
     additionalConditions.push(condition);
+    
+    // Remove form
+    document.getElementById('newConditionForm').remove();
+    
+    // Re-render conditions
+    renderAdditionalConditions();
+}
+
+// Cancel adding new condition
+function cancelAddCondition() {
+    document.getElementById('newConditionForm').remove();
     renderAdditionalConditions();
 }
 
