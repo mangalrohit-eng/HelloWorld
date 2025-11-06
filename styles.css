@@ -24,9 +24,9 @@ body {
 
 /* Utility Bar */
 .utility-bar {
-    background: #000000;
+    background: #FFFFFF;
     padding: 12px 0;
-    border-bottom: 1px solid #333333;
+    border-bottom: 1px solid #E0E0E0;
 }
 
 .utility-content {
@@ -42,7 +42,7 @@ body {
 }
 
 .utility-link {
-    color: #FFFFFF;
+    color: #000000;
     font-size: 0.875rem;
     cursor: pointer;
     transition: color 0.2s ease;
@@ -53,7 +53,7 @@ body {
 }
 
 .utility-divider {
-    color: #666666;
+    color: #CCCCCC;
     font-size: 0.875rem;
 }
 
@@ -74,7 +74,7 @@ body {
 }
 
 .user-profile:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: #F6F6F6;
 }
 
 .user-avatar {
@@ -98,20 +98,20 @@ body {
 }
 
 .user-name {
-    color: #FFFFFF;
+    color: #000000;
     font-size: 0.9rem;
     font-weight: 600;
 }
 
 .user-role {
-    color: #999999;
+    color: #666666;
     font-size: 0.75rem;
     font-weight: 400;
 }
 
 /* Header */
 .header {
-    background: #000000;
+    background: #FFFFFF;
     padding: 20px 0;
     margin-bottom: 0;
     border-bottom: 4px solid #CD040B;
@@ -154,7 +154,7 @@ body {
 }
 
 .header-content h1 {
-    color: #FFFFFF;
+    color: #000000;
     font-size: 1.5rem;
     margin: 0;
     font-weight: 700;
@@ -162,7 +162,7 @@ body {
 }
 
 .header-subtitle {
-    color: #999999;
+    color: #666666;
     font-size: 0.875rem;
     margin: 4px 0 0 0;
     font-weight: 400;
