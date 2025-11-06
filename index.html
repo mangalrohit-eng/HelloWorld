@@ -12,15 +12,36 @@
         <header class="header">
             <div class="header-content">
                 <div class="logo-section">
-                    <svg class="verizon-logo" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
-                        <text x="10" y="35" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#FFFFFF">Verizon</text>
-                        <rect x="0" y="40" width="120" height="4" fill="#CD040B"/>
-                    </svg>
+                    <img src="https://www.verizon.com/about/sites/default/files/Verizon_Logo_Black_Red_CMYK-1.png" alt="Verizon Logo" class="verizon-logo">
                 </div>
                 <h1>Circuit Decommission Portal</h1>
                 <p class="subtitle">Network Engineering Management System</p>
             </div>
         </header>
+
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="hero-overlay">
+                <div class="hero-content">
+                    <h2 class="hero-title">Intelligent Network Optimization</h2>
+                    <p class="hero-subtitle">AI-powered circuit analysis and decommission management for enterprise telecom infrastructure</p>
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <span class="stat-number">100+</span>
+                            <span class="stat-label">Circuits Monitored</span>
+                        </div>
+                        <div class="hero-stat">
+                            <span class="stat-number">24/7</span>
+                            <span class="stat-label">Network Analysis</span>
+                        </div>
+                        <div class="hero-stat">
+                            <span class="stat-number">AI</span>
+                            <span class="stat-label">Powered Insights</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Navigation Tabs -->
         <nav class="tabs">
@@ -49,11 +70,25 @@
                         <label for="ruleCondition">Condition Type *</label>
                         <select id="ruleCondition" required>
                             <option value="">Select condition...</option>
-                            <option value="utilization">Utilization Percentage</option>
-                            <option value="bandwidth">Bandwidth Threshold</option>
-                            <option value="age">Circuit Age (months)</option>
-                            <option value="traffic">Traffic Volume</option>
-                            <option value="cost">Cost per Mbps</option>
+                            <optgroup label="Performance Metrics">
+                                <option value="utilization">Utilization Percentage</option>
+                                <option value="bandwidth">Bandwidth Threshold (Mbps)</option>
+                                <option value="traffic">Traffic Volume (GB)</option>
+                            </optgroup>
+                            <optgroup label="Cost & Age">
+                                <option value="age">Circuit Age (months)</option>
+                                <option value="cost">Cost per Mbps ($)</option>
+                            </optgroup>
+                            <optgroup label="Service Status">
+                                <option value="contract_status">Contract Status</option>
+                                <option value="service_type">Service Type (Legacy/Modern)</option>
+                                <option value="redundancy">Redundancy Status</option>
+                            </optgroup>
+                            <optgroup label="Business & Technical">
+                                <option value="site_status">Site/Facility Status</option>
+                                <option value="hardware_eol">Hardware EOL/EOS Status</option>
+                                <option value="provider_status">Provider/Carrier Status</option>
+                            </optgroup>
                         </select>
                     </div>
 
@@ -66,6 +101,7 @@
                                 <option value=">">Greater than</option>
                                 <option value=">=">Greater than or equal</option>
                                 <option value="==">Equal to</option>
+                                <option value="!=">Not equal to</option>
                             </select>
                         </div>
 

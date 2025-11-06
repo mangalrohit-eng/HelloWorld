@@ -155,7 +155,13 @@ function getConditionLabel(condition) {
         'bandwidth': 'Bandwidth (Mbps)',
         'age': 'Age (months)',
         'traffic': 'Traffic Volume (GB)',
-        'cost': 'Cost per Mbps ($)'
+        'cost': 'Cost per Mbps ($)',
+        'contract_status': 'Contract Status',
+        'service_type': 'Service Type',
+        'redundancy': 'Redundancy Status',
+        'site_status': 'Site Status',
+        'hardware_eol': 'Hardware EOL/EOS',
+        'provider_status': 'Provider Status'
     };
     return labels[condition] || condition;
 }
@@ -164,96 +170,71 @@ function getConditionLabel(condition) {
 function generateSampleCircuits() {
     if (circuits.length > 0) return; // Don't regenerate if data exists
     
-    circuits = [
-        {
-            id: 'CKT-2024-001',
-            location: 'New York - Manhattan',
-            bandwidth: 100,
-            utilization: 15,
-            age: 36,
-            traffic: 45,
-            cost: 12.50,
-            status: 'active',
-            comments: []
-        },
-        {
-            id: 'CKT-2024-002',
-            location: 'Los Angeles - Downtown',
-            bandwidth: 1000,
-            utilization: 75,
-            age: 12,
-            traffic: 850,
-            cost: 8.20,
-            status: 'active',
-            comments: []
-        },
-        {
-            id: 'CKT-2024-003',
-            location: 'Chicago - Loop',
-            bandwidth: 500,
-            utilization: 22,
-            age: 48,
-            traffic: 120,
-            cost: 15.00,
-            status: 'active',
-            comments: []
-        },
-        {
-            id: 'CKT-2024-004',
-            location: 'Houston - Energy Corridor',
-            bandwidth: 250,
-            utilization: 88,
-            age: 6,
-            traffic: 225,
-            cost: 9.50,
-            status: 'active',
-            comments: []
-        },
-        {
-            id: 'CKT-2024-005',
-            location: 'Phoenix - Downtown',
-            bandwidth: 100,
-            utilization: 18,
-            age: 60,
-            traffic: 25,
-            cost: 18.75,
-            status: 'active',
-            comments: []
-        },
-        {
-            id: 'CKT-2024-006',
-            location: 'Philadelphia - Center City',
-            bandwidth: 500,
-            utilization: 45,
-            age: 24,
-            traffic: 240,
-            cost: 11.00,
-            status: 'active',
-            comments: []
-        },
-        {
-            id: 'CKT-2024-007',
-            location: 'San Antonio - Medical Center',
-            bandwidth: 100,
-            utilization: 12,
-            age: 72,
-            traffic: 15,
-            cost: 22.00,
-            status: 'active',
-            comments: []
-        },
-        {
-            id: 'CKT-2024-008',
-            location: 'San Diego - Mission Valley',
-            bandwidth: 250,
-            utilization: 65,
-            age: 18,
-            traffic: 180,
-            cost: 10.50,
-            status: 'active',
-            comments: []
-        }
+    const cities = [
+        'New York - Manhattan', 'Los Angeles - Downtown', 'Chicago - Loop', 'Houston - Energy Corridor',
+        'Phoenix - Downtown', 'Philadelphia - Center City', 'San Antonio - Medical Center', 'San Diego - Mission Valley',
+        'Dallas - Uptown', 'Austin - Domain', 'Jacksonville - Riverside', 'San Jose - Silicon Valley',
+        'Fort Worth - Downtown', 'Columbus - Short North', 'Charlotte - Uptown', 'Indianapolis - Downtown',
+        'Seattle - Capitol Hill', 'Denver - LoDo', 'Boston - Back Bay', 'Portland - Pearl District',
+        'Nashville - Midtown', 'Detroit - Downtown', 'Memphis - Medical District', 'Louisville - Downtown',
+        'Baltimore - Harbor East', 'Milwaukee - Third Ward', 'Albuquerque - Downtown', 'Tucson - University',
+        'Fresno - Tower District', 'Sacramento - Midtown', 'Kansas City - Crossroads', 'Mesa - Downtown',
+        'Atlanta - Midtown', 'Omaha - Old Market', 'Raleigh - Downtown', 'Miami - Brickell',
+        'Cleveland - Downtown', 'Tulsa - Downtown', 'Oakland - Jack London Square', 'Minneapolis - Downtown',
+        'Wichita - Old Town', 'Arlington - Downtown', 'Tampa - Channelside', 'Aurora - Downtown',
+        'Anaheim - Platinum Triangle', 'Santa Ana - Downtown', 'St. Louis - Downtown', 'Pittsburgh - Downtown',
+        'Cincinnati - Over-the-Rhine', 'Bakersfield - Downtown', 'Toledo - Downtown', 'Riverside - Downtown',
+        'Stockton - Downtown', 'Corpus Christi - Downtown', 'Lexington - Downtown', 'Henderson - Downtown',
+        'Anchorage - Downtown', 'Plano - Legacy West', 'Newark - Downtown', 'Lincoln - Haymarket',
+        'Orlando - Downtown', 'Irvine - Spectrum Center', 'Chula Vista - Downtown', 'Durham - Downtown',
+        'Buffalo - Downtown', 'Chandler - Downtown', 'Reno - Downtown', 'Norfolk - Downtown',
+        'Gilbert - Downtown', 'Irving - Las Colinas', 'Scottsdale - Old Town', 'Baton Rouge - Downtown',
+        'Spokane - Downtown', 'Richmond - Downtown', 'Des Moines - Downtown', 'Boise - Downtown',
+        'Tacoma - Downtown', 'Fremont - Downtown', 'San Bernardino - Downtown', 'Modesto - Downtown',
+        'Birmingham - Downtown', 'Rochester - Downtown', 'Oxnard - Downtown', 'Fontana - Downtown',
+        'Fayetteville - Downtown', 'Moreno Valley - Downtown', 'Huntington Beach - Downtown', 'Glendale - Downtown',
+        'Yonkers - Downtown', 'Salt Lake City - Downtown', 'Grand Rapids - Downtown', 'Amarillo - Downtown',
+        'Worcester - Downtown', 'Little Rock - Downtown', 'Augusta - Downtown', 'Port St. Lucie - Downtown',
+        'Cape Coral - Downtown', 'Sioux Falls - Downtown', 'Peoria - Downtown', 'Springfield - Downtown',
+        'Vancouver - Downtown', 'Knoxville - Downtown', 'Brownsville - Downtown', 'Fort Lauderdale - Downtown'
     ];
+    
+    const bandwidths = [50, 100, 250, 500, 1000, 10000];
+    const contractStatuses = ['active', 'expired', 'expiring_soon'];
+    const serviceTypes = ['legacy', 'modern'];
+    const redundancyStatuses = ['yes', 'no'];
+    const siteStatuses = ['active', 'closed', 'relocated', 'consolidated'];
+    const hardwareEolStatuses = ['yes', 'no'];
+    const providerStatuses = ['current', 'migrated', 'pending_migration'];
+    
+    circuits = [];
+    
+    for (let i = 1; i <= 100; i++) {
+        const bandwidth = bandwidths[Math.floor(Math.random() * bandwidths.length)];
+        const utilization = Math.floor(Math.random() * 100);
+        const age = Math.floor(Math.random() * 84) + 1; // 1-84 months (7 years)
+        const trafficPercent = utilization / 100;
+        const traffic = Math.floor(bandwidth * trafficPercent * 0.9); // Traffic in GB
+        const cost = (Math.random() * 20 + 5).toFixed(2); // $5-$25 per Mbps
+        
+        circuits.push({
+            id: `CKT-2024-${String(i).padStart(3, '0')}`,
+            location: cities[i - 1] || `Location ${i}`,
+            bandwidth: bandwidth,
+            utilization: utilization,
+            age: age,
+            traffic: traffic,
+            cost: parseFloat(cost),
+            contract_status: contractStatuses[Math.floor(Math.random() * contractStatuses.length)],
+            service_type: serviceTypes[Math.floor(Math.random() * serviceTypes.length)],
+            redundancy: redundancyStatuses[Math.floor(Math.random() * redundancyStatuses.length)],
+            site_status: siteStatuses[Math.floor(Math.random() * siteStatuses.length)],
+            hardware_eol: hardwareEolStatuses[Math.floor(Math.random() * hardwareEolStatuses.length)],
+            provider_status: providerStatuses[Math.floor(Math.random() * providerStatuses.length)],
+            status: 'active',
+            comments: []
+        });
+    }
     
     saveData();
 }
@@ -611,6 +592,19 @@ function evaluateRule(circuit, rule) {
     const circuitValue = circuit[rule.condition];
     const ruleValue = rule.value;
     
+    // Handle text-based conditions
+    const textBasedConditions = ['contract_status', 'service_type', 'redundancy', 'site_status', 'hardware_eol', 'provider_status'];
+    if (textBasedConditions.includes(rule.condition)) {
+        // For text conditions, only use equality/inequality
+        if (rule.operator === '==' || rule.operator === '=') {
+            return circuitValue === ruleValue;
+        } else if (rule.operator === '!=') {
+            return circuitValue !== ruleValue;
+        }
+        return false;
+    }
+    
+    // Handle numeric conditions
     switch (rule.operator) {
         case '<':
             return circuitValue < ruleValue;
@@ -622,6 +616,8 @@ function evaluateRule(circuit, rule) {
             return circuitValue >= ruleValue;
         case '==':
             return circuitValue == ruleValue;
+        case '!=':
+            return circuitValue != ruleValue;
         default:
             return false;
     }
