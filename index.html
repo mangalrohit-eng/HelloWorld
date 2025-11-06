@@ -8,6 +8,10 @@
     <title>Circuit Decommission Portal | Verizon</title>
     <link rel="icon" type="image/x-icon" href="https://www.verizon.com/content/dam/verizon/favicon.ico">
     <link rel="stylesheet" href="styles.css">
+    <!-- Font Awesome for Professional Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <!-- Utility Bar -->
@@ -21,14 +25,58 @@
                     <span class="utility-divider">|</span>
                     <span class="utility-link">1-800-VZN-TECH</span>
                 </div>
-                <div class="utility-right">
-                    <div class="user-profile">
-                        <div class="user-avatar">JD</div>
-                        <div class="user-info">
-                            <span class="user-name">Jane Doe</span>
-                            <span class="user-role">Network Engineer</span>
+                    <div class="utility-right">
+                        <div class="notification-bell" onclick="toggleNotificationPanel()">
+                            <i class="fa-regular fa-bell bell-icon"></i>
+                            <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                        </div>
+                        <div class="user-profile">
+                            <div class="user-avatar">JD</div>
+                            <div class="user-info">
+                                <span class="user-name">Jane Doe</span>
+                                <span class="user-role">Network Engineer</span>
+                            </div>
                         </div>
                     </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loadingText">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-header">
+            <h3><i class="fa-regular fa-bell"></i> Notifications</h3>
+            <div class="notification-actions">
+                <button class="btn-link" onclick="markAllAsRead()">Mark all as read</button>
+                <button class="btn-link" onclick="clearAllNotifications()">Clear all</button>
+            </div>
+        </div>
+        <div class="notification-list" id="notificationList">
+            <div class="empty-state">No notifications</div>
+        </div>
+    </div>
+
+    <!-- Circuit History Modal -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content history-modal">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-clock-rotate-left"></i> Circuit History</h2>
+                <button class="modal-close" onclick="closeHistoryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="history-circuit-info" id="historyCircuitInfo">
+                    <!-- Circuit info will be populated here -->
+                </div>
+                <div class="history-timeline" id="historyTimeline">
+                    <!-- Timeline will be populated here -->
                 </div>
             </div>
         </div>
@@ -66,14 +114,14 @@
 
         <!-- Navigation Tabs -->
         <nav class="tabs">
-            <button class="tab-btn active" data-tab="rules">Decom Criteria</button>
-            <button class="tab-btn" data-tab="review">Circuit Review</button>
+            <button class="tab-btn active" data-tab="review">Circuit Review</button>
             <button class="tab-btn" data-tab="decommission">Initiate Decommission</button>
             <button class="tab-btn" data-tab="analytics">Analytics</button>
+            <button class="tab-btn" data-tab="rules">Decom Criteria</button>
         </nav>
 
         <!-- Rules Management Section -->
-        <section id="rules" class="tab-content active">
+        <section id="rules" class="tab-content">
             <div class="section-header">
                 <h2>Manage Decommission Criteria</h2>
                 <p>Define rules to identify circuits eligible for decommissioning</p>
@@ -81,13 +129,43 @@
 
             <!-- Sub-tabs for Decom Criteria -->
             <div class="sub-tabs">
-                <button class="sub-tab-btn active" data-subtab="newRule">➕ Create New Rule</button>
-                <button class="sub-tab-btn" data-subtab="activeRules">📋 Active Rules</button>
-                <button class="sub-tab-btn" data-subtab="aiRules">🤖 AI Generated Rules</button>
+                <button class="sub-tab-btn active" data-subtab="aiRules"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Generated Rules</button>
+                <button class="sub-tab-btn" data-subtab="activeRules"><i class="fa-solid fa-list-check"></i> Active Rules</button>
+                <button class="sub-tab-btn" data-subtab="newRule"><i class="fa-solid fa-plus"></i> Create New Rule</button>
+            </div>
+
+            <!-- Sub-tab: AI Generated Rules -->
+            <div id="aiRules" class="sub-tab-content active">
+                <div class="card" style="background: #FFF5F5; border-left: 4px solid #CD040B;">
+                    <h3><i class="fa-solid fa-wand-magic-sparkles"></i> AI-Powered Rule Learning</h3>
+                    <p style="color: #666666; margin-bottom: 20px;">Analyze engineer feedback to automatically create exclusion rules from "Keep Active" comments</p>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <button class="btn btn-secondary" onclick="learnFromFeedback()">
+                            <i class="fa-solid fa-brain"></i> Learn from Feedback
+                        </button>
+                    <span id="feedbackCount" style="color: #666666; font-size: 0.9rem;">
+                        0 rejection comments available
+                    </span>
+                </div>
+                <div id="learnedRules" style="margin-top: 20px; display: none;">
+                    <h4 style="color: #CD040B; font-size: 1.1rem; margin-bottom: 10px;">✨ AI-Generated Rules:</h4>
+                    <div id="suggestedRulesList"></div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Sub-tab: Active Rules -->
+            <div id="activeRules" class="sub-tab-content">
+                <div class="card">
+                    <h3>Active Rules</h3>
+                    <div id="rulesList" class="rules-list">
+                        <!-- Rules will be populated here -->
+                    </div>
+                </div>
             </div>
 
             <!-- Sub-tab: Create New Rule -->
-            <div id="newRule" class="sub-tab-content active">
+            <div id="newRule" class="sub-tab-content">
                 <div class="card">
                     <h3>Add New Rule</h3>
                     <form id="ruleForm">
@@ -183,7 +261,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <label style="font-weight: 600; color: #000000;">Additional Conditions:</label>
                             <button type="button" class="btn btn-secondary" onclick="addConditionToRule()" style="padding: 8px 16px;">
-                                ➕ Add Condition
+                                <i class="fa-solid fa-plus"></i> Add Condition
                             </button>
                         </div>
                         <div id="conditionsList" style="display: flex; flex-direction: column; gap: 10px;">
@@ -199,51 +277,103 @@
                 </form>
             </div>
             </div>
-
-            <!-- Sub-tab: Active Rules -->
-            <div id="activeRules" class="sub-tab-content">
-                <div class="card">
-                    <h3>Active Rules</h3>
-                    <div id="rulesList" class="rules-list">
-                        <!-- Rules will be populated here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sub-tab: AI Generated Rules -->
-            <div id="aiRules" class="sub-tab-content">
-                <div class="card" style="background: #FFF5F5; border-left: 4px solid #CD040B;">
-                    <h3>🤖 AI-Powered Rule Learning</h3>
-                <p style="color: #666666; margin-bottom: 20px;">Analyze engineer feedback to automatically create exclusion rules from "Keep Active" comments</p>
-                <div style="display: flex; gap: 15px; align-items: center;">
-                    <button class="btn btn-secondary" onclick="learnFromFeedback()">
-                        🧠 Learn from Feedback
-                    </button>
-                    <span id="feedbackCount" style="color: #666666; font-size: 0.9rem;">
-                        0 rejection comments available
-                    </span>
-                </div>
-                <div id="learnedRules" style="margin-top: 20px; display: none;">
-                    <h4 style="color: #CD040B; font-size: 1.1rem; margin-bottom: 10px;">✨ AI-Generated Rules:</h4>
-                    <div id="suggestedRulesList"></div>
-                </div>
-            </div>
-            </div>
         </section>
 
         <!-- Circuit Review Section -->
-        <section id="review" class="tab-content">
+        <section id="review" class="tab-content active">
             <div class="section-header">
                 <h2>Review Flagged Circuits</h2>
                 <p>Review circuits identified for decommissioning and add comments</p>
             </div>
 
+            <!-- Search and Filter Card -->
+            <div class="card">
+                <div class="search-filter-section">
+                <!-- Search Bar -->
+                <div class="search-bar">
+                    <input type="text" id="circuitSearch" placeholder="Search by Circuit ID, Location..." oninput="applyFilters()">
+                    <button class="btn btn-secondary" onclick="clearFilters()">Clear All</button>
+                </div>
+
+                    <!-- Filter Controls -->
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label for="statusFilter">Status:</label>
+                            <select id="statusFilter" onchange="applyFilters()">
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="flagged">Flagged</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="utilizationFilter">Utilization:</label>
+                            <select id="utilizationFilter" onchange="applyFilters()">
+                                <option value="all">All</option>
+                                <option value="0-20">0-20%</option>
+                                <option value="20-50">20-50%</option>
+                                <option value="50-80">50-80%</option>
+                                <option value="80-100">80-100%</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="ageFilter">Age:</label>
+                            <select id="ageFilter" onchange="applyFilters()">
+                                <option value="all">All Ages</option>
+                                <option value="0-12">0-12 months</option>
+                                <option value="12-36">1-3 years</option>
+                                <option value="36-60">3-5 years</option>
+                                <option value="60+">5+ years</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="serviceTypeFilter">Service Type:</label>
+                            <select id="serviceTypeFilter" onchange="applyFilters()">
+                                <option value="all">All Types</option>
+                                <option value="legacy">Legacy</option>
+                                <option value="modern">Modern</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Results Summary -->
+                    <div class="filter-results">
+                        <span id="filteredCount">Showing 0 of 0 circuits</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Toolbar -->
             <div class="card">
                 <div class="toolbar">
-                    <button class="btn btn-secondary" onclick="runAnalysis()">🔍 Run Analysis</button>
+                    <div class="toolbar-left">
+                        <button class="btn btn-secondary" onclick="runAnalysis()"><i class="fa-solid fa-play"></i> Run Analysis</button>
+                        <button class="btn btn-secondary" onclick="exportCircuits()"><i class="fa-solid fa-file-export"></i> Export to CSV</button>
+                        <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()"><i class="fa-solid fa-file-import"></i> Import CSV</button>
+                        <input type="file" id="importFile" accept=".csv" style="display: none;" onchange="importCircuits(event)">
+                    </div>
                     <div class="stats">
                         <span class="stat-badge" id="totalCircuits">0 Circuits</span>
                         <span class="stat-badge flagged" id="flaggedCircuits">0 Flagged</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Selection Card (Always Visible) -->
+            <div class="card" style="background: #F9F9F9; border: 2px solid #E0E0E0;">
+                <div class="bulk-actions-toolbar">
+                    <div class="bulk-selection">
+                        <input type="checkbox" id="selectAllCircuits" onchange="toggleSelectAll()">
+                        <label for="selectAllCircuits" style="cursor: pointer;"><strong>Select All Circuits</strong> <span id="selectedCount" style="color: #666; font-weight: normal;">(0 selected)</span></label>
+                    </div>
+                    <div class="bulk-buttons" id="bulkActionButtons" style="display: none;">
+                        <button class="btn btn-success" onclick="bulkApprove()"><i class="fa-solid fa-check"></i> Approve Selected</button>
+                        <button class="btn btn-danger" onclick="bulkReject()"><i class="fa-solid fa-xmark"></i> Reject Selected</button>
+                        <button class="btn btn-secondary" onclick="clearSelection()">Clear Selection</button>
                     </div>
                 </div>
             </div>
@@ -267,7 +397,7 @@
                         <span class="stat-badge" id="processedDecommission">0 In Process</span>
                     </div>
                     <button class="btn btn-primary" id="sendDecommissionBtn" onclick="sendForDecommission()">
-                        📤 Send Selected for Decommission
+                        <i class="fa-solid fa-paper-plane"></i> Send Selected for Decommission
                     </button>
                 </div>
             </div>
@@ -284,10 +414,41 @@
                 <p>Comprehensive overview of circuit decommissioning metrics</p>
             </div>
 
+            <!-- Export and Filter Controls -->
+            <div class="card">
+                <div class="analytics-controls">
+                    <div class="date-filter">
+                        <label>Time Period:</label>
+                        <select id="analyticsTimeFilter" onchange="updateAnalyticsDashboard()">
+                            <option value="all">All Time</option>
+                            <option value="7">Last 7 Days</option>
+                            <option value="30">Last 30 Days</option>
+                            <option value="90">Last 90 Days</option>
+                        </select>
+                    </div>
+                    <div class="analytics-actions">
+                        <button class="btn btn-secondary" onclick="refreshAnalytics()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                        <button class="btn btn-secondary" onclick="exportAnalyticsPDF()"><i class="fa-solid fa-file-pdf"></i> Export Report</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Savings Calculator -->
+            <div class="card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                <div class="cost-savings-card">
+                    <div class="savings-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+                    <div class="savings-content">
+                        <h3 id="estimatedSavings">$0</h3>
+                        <p>Estimated Annual Savings</p>
+                        <small id="savingsBreakdown">Based on approved circuits</small>
+                    </div>
+                </div>
+            </div>
+
             <!-- Key Metrics Cards -->
             <div class="analytics-grid">
                 <div class="analytics-card">
-                    <div class="analytics-icon">📊</div>
+                    <div class="analytics-icon"><i class="fa-solid fa-chart-line"></i></div>
                     <div class="analytics-content">
                         <h3 id="analytics-total">0</h3>
                         <p>Total Circuits</p>
@@ -295,7 +456,7 @@
                 </div>
 
                 <div class="analytics-card flagged">
-                    <div class="analytics-icon">⚠️</div>
+                    <div class="analytics-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     <div class="analytics-content">
                         <h3 id="analytics-flagged">0</h3>
                         <p>Flagged for Review</p>
@@ -303,7 +464,7 @@
                 </div>
 
                 <div class="analytics-card approved">
-                    <div class="analytics-icon">✓</div>
+                    <div class="analytics-icon"><i class="fa-solid fa-circle-check"></i></div>
                     <div class="analytics-content">
                         <h3 id="analytics-approved">0</h3>
                         <p>Validated for Decommission</p>
@@ -311,7 +472,7 @@
                 </div>
 
                 <div class="analytics-card rejected">
-                    <div class="analytics-icon">✗</div>
+                    <div class="analytics-icon"><i class="fa-solid fa-circle-xmark"></i></div>
                     <div class="analytics-content">
                         <h3 id="analytics-rejected">0</h3>
                         <p>Kept Active</p>
@@ -319,7 +480,7 @@
                 </div>
 
                 <div class="analytics-card in-process">
-                    <div class="analytics-icon">🔄</div>
+                    <div class="analytics-icon"><i class="fa-solid fa-arrows-spin"></i></div>
                     <div class="analytics-content">
                         <h3 id="analytics-in-process">0</h3>
                         <p>Sent for Decommission</p>
@@ -327,7 +488,7 @@
                 </div>
 
                 <div class="analytics-card pending">
-                    <div class="analytics-icon">⏳</div>
+                    <div class="analytics-icon"><i class="fa-solid fa-hourglass-half"></i></div>
                     <div class="analytics-content">
                         <h3 id="analytics-pending">0</h3>
                         <p>Pending Action</p>
@@ -414,6 +575,57 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Interactive Charts -->
+            <div class="charts-grid">
+                <!-- Status Distribution Chart -->
+                <div class="card chart-card">
+                    <h3>Circuit Status Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Utilization Distribution Chart -->
+                <div class="card chart-card">
+                    <h3>Utilization Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="utilizationChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Age Distribution Chart -->
+                <div class="card chart-card">
+                    <h3>Circuit Age Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="ageChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Service Type Chart -->
+                <div class="card chart-card">
+                    <h3>Service Type Breakdown</h3>
+                    <div class="chart-container">
+                        <canvas id="serviceTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Chart -->
+            <div class="card">
+                <h3>Decommission Trend Over Time</h3>
+                <div class="chart-container-large">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Rules Performance -->
+            <div class="card">
+                <h3>Top Performing Rules</h3>
+                <div class="chart-container-medium">
+                    <canvas id="rulesChart"></canvas>
+                </div>
+            </div>
         </section>
     </div>
 
@@ -421,12 +633,12 @@
     <footer class="main-footer">
         <div class="footer-content">
             <div class="footer-section">
-                <h4>⚠️ AI Disclaimer</h4>
+                <h4><i class="fa-solid fa-circle-exclamation"></i> AI Disclaimer</h4>
                 <p>This portal uses AI-powered analysis to suggest circuit decommission candidates. All AI-generated recommendations should be reviewed and validated by qualified network engineers before implementation. Verizon is not responsible for decisions made solely based on automated suggestions.</p>
             </div>
             
             <div class="footer-section">
-                <h4>📞 Contact Us</h4>
+                <h4><i class="fa-solid fa-phone"></i> Contact Us</h4>
                 <p><strong>Engineering Analytics Team</strong></p>
                 <p>Email: <a href="mailto:network-analytics@verizon.com">network-analytics@verizon.com</a></p>
                 <p>Support Hotline: 1-800-VZN-TECH</p>
@@ -464,22 +676,22 @@
         <div class="learning-container">
             <div class="learning-agents">
                 <div class="learning-agent" id="learningAgent1">
-                    <div class="agent-icon-small">📊</div>
+                    <div class="agent-icon-small"><i class="fa-solid fa-database"></i></div>
                     <span class="agent-status-text" id="learningStatus1">Ready</span>
                 </div>
                 <div class="agent-arrow-small">→</div>
                 <div class="learning-agent" id="learningAgent2">
-                    <div class="agent-icon-small">🔍</div>
+                    <div class="agent-icon-small"><i class="fa-solid fa-microchip"></i></div>
                     <span class="agent-status-text" id="learningStatus2">Ready</span>
                 </div>
                 <div class="agent-arrow-small">→</div>
                 <div class="learning-agent" id="learningAgent3">
-                    <div class="agent-icon-small">🧠</div>
+                    <div class="agent-icon-small"><i class="fa-solid fa-shield-halved"></i></div>
                     <span class="agent-status-text" id="learningStatus3">Ready</span>
                 </div>
                 <div class="agent-arrow-small">→</div>
                 <div class="learning-agent" id="learningAgent4">
-                    <div class="agent-icon-small">✅</div>
+                    <div class="agent-icon-small"><i class="fa-solid fa-circle-check"></i></div>
                     <span class="agent-status-text" id="learningStatus4">Ready</span>
                 </div>
             </div>

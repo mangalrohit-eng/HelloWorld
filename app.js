@@ -2,6 +2,19 @@
 let rules = [];
 let circuits = [];
 
+// Loading State Management
+function showLoading(message = 'Loading...') {
+    const overlay = document.getElementById('loadingOverlay');
+    const text = document.getElementById('loadingText');
+    text.textContent = message;
+    overlay.classList.add('active');
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.remove('active');
+}
+
 // Initialize application
 document.addEventListener('DOMContentLoaded', function() {
     loadData();
@@ -11,11 +24,20 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeRuleForm();
     renderRules();
     generateSampleCircuits();
+    initializeCircuitHistory();
+    initializeNotificationSystem();
+    renderCircuits();
     updateStats();
     renderDecommissionList();
     updateDecommissionStats();
     updateAnalytics();
     updateFeedbackCount();
+    updateSelectionUI();
+    
+    // Initialize charts when Analytics tab is viewed
+    setTimeout(() => {
+        updateAnalyticsDashboard();
+    }, 500);
 });
 
 // Create Default Rules
@@ -591,7 +613,7 @@ function renderRules() {
         const ruleType = rule.type || 'include'; // Default to 'include' for legacy rules
         const typeLabel = ruleType === 'include' ? 'Include for Decommission' : 'Exclude from Decommission';
         const typeClass = ruleType === 'include' ? 'rule-type-include' : 'rule-type-exclude';
-        const typeIcon = ruleType === 'include' ? '✓' : '✗';
+        const typeIcon = ruleType === 'include' ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-xmark"></i>';
         
         // Build condition display
         let conditionHTML = '';
@@ -770,8 +792,14 @@ function runAnalysis() {
         return;
     }
     
-    // Start analysis workflow using footer bar
-    startAnalysisWorkflow();
+    showLoading('Running circuit analysis...');
+    
+    // Small delay to show loading state
+    setTimeout(() => {
+        hideLoading();
+        // Start analysis workflow using footer bar
+        startAnalysisWorkflow();
+    }, 800);
 }
 
 // Analysis Workflow using Footer Bar
@@ -886,6 +914,7 @@ function runAnalysisAgent4() {
     renderCircuits();
     updateStats();
     updateAnalytics();
+    updateSelectionUI();
     
     setTimeout(() => {
         status.textContent = 'AI Agent completed analysis';
@@ -895,6 +924,9 @@ function runAnalysisAgent4() {
         
         const flaggedCount = circuits.filter(c => c.flagged).length;
         showNotification(`Analysis completed! ${flaggedCount} circuits flagged for review`);
+        
+        // Add notification
+        addNotification('warning', `Analysis complete: ${flaggedCount} circuits flagged and pending your review`, null);
         
         // Hide footer after a delay
         setTimeout(() => {
@@ -1213,34 +1245,56 @@ function evaluateSingleCondition(circuit, condition, operator, value) {
     }
 }
 
+// Global variable for filtered circuits
+let filteredCircuits = [];
+
+// Initialize filtered circuits with all circuits
+function initializeFilteredCircuits() {
+    filteredCircuits = circuits;
+}
+
 // Render Circuits
-function renderCircuits() {
+function renderCircuits(circuitsToRender = null) {
     const circuitsList = document.getElementById('circuitsList');
     
-    if (circuits.length === 0) {
-        circuitsList.innerHTML = '<div class="card"><div class="empty-state">No circuits available.</div></div>';
+    // Use provided circuits or all circuits
+    const displayCircuits = circuitsToRender !== null ? circuitsToRender : circuits;
+    filteredCircuits = [...displayCircuits];
+    
+    if (displayCircuits.length === 0) {
+        circuitsList.innerHTML = '<div class="card"><div class="empty-state">No circuits match your filters.</div></div>';
+        updateFilterCount(0, circuits.length);
         return;
     }
     
+    // Update filter count
+    updateFilterCount(displayCircuits.length, circuits.length);
+    
     // Show flagged circuits first
-    const sortedCircuits = [...circuits].sort((a, b) => {
+    const sortedCircuits = [...displayCircuits].sort((a, b) => {
         if (a.flagged && !b.flagged) return -1;
         if (!a.flagged && b.flagged) return 1;
         return 0;
     });
     
     circuitsList.innerHTML = sortedCircuits.map(circuit => `
-        <div class="circuit-card ${circuit.flagged ? 'flagged' : ''} ${circuit.status !== 'active' ? circuit.status : ''}">
-            <div class="circuit-header">
+        <div class="circuit-card ${circuit.flagged ? 'flagged' : ''} ${circuit.status !== 'active' ? circuit.status : ''} ${circuit.selected ? 'selected' : ''}" id="circuit-${circuit.id}" data-circuit-id="${circuit.id}">
+            <input type="checkbox" class="circuit-checkbox" data-circuit-id="${circuit.id}" onchange="toggleCircuitSelection('${circuit.id}')" ${circuit.selected ? 'checked' : ''}>
+            <div class="circuit-header" style="margin-left: 40px;">
                 <div class="circuit-info">
                     <h4>${circuit.id}</h4>
                     <p style="color: #718096; font-size: 0.95rem;">${circuit.location}</p>
                 </div>
-                <span class="circuit-status ${circuit.flagged ? 'flagged' : circuit.status}">
-                    ${circuit.status === 'approved' ? '✓ Approved for Decommission' : 
-                      circuit.status === 'rejected' ? '✗ Keep Active' :
-                      circuit.flagged ? '⚠ Flagged for Review' : '● Active'}
-                </span>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="viewCircuitHistory('${circuit.id}')">
+                        <i class="fa-solid fa-clock-rotate-left"></i> View History
+                    </button>
+                    <span class="circuit-status ${circuit.flagged ? 'flagged' : circuit.status}">
+                        ${circuit.status === 'approved' ? '<i class="fa-solid fa-check"></i> Approved for Decommission' : 
+                          circuit.status === 'rejected' ? '<i class="fa-solid fa-xmark"></i> Keep Active' :
+                          circuit.flagged ? '<i class="fa-solid fa-triangle-exclamation"></i> Flagged for Review' : '<i class="fa-solid fa-circle"></i> Active'}
+                    </span>
+                </div>
             </div>
             
             <div class="circuit-details">
@@ -1268,7 +1322,7 @@ function renderCircuits() {
             
             ${circuit.flagged && circuit.matchedRules.length > 0 ? `
                 <div class="matched-rules">
-                    <strong>⚠ Matched Rules:</strong>
+                    <strong><i class="fa-solid fa-triangle-exclamation"></i> Matched Rules:</strong>
                     <ul>
                         ${circuit.matchedRules.map(ruleName => `<li>${ruleName}</li>`).join('')}
                     </ul>
@@ -1293,10 +1347,10 @@ function renderCircuits() {
                     <textarea id="comment-${circuit.id}" placeholder="Add your comments about this circuit's decommission status..." rows="3"></textarea>
                     <div class="circuit-actions">
                         <button class="btn btn-approve" onclick="approveDecommission('${circuit.id}')">
-                            ✓ Approve Decommission
+                            <i class="fa-solid fa-check"></i> Approve Decommission
                         </button>
                         <button class="btn btn-reject" onclick="rejectDecommission('${circuit.id}')">
-                            ✗ Keep Active
+                            <i class="fa-solid fa-xmark"></i> Keep Active
                         </button>
                     </div>
                 </div>
@@ -1319,8 +1373,16 @@ function approveDecommission(circuitId) {
     circuit.comments.push({
         date: new Date().toLocaleString(),
         decision: 'Approved for Decommission',
-        text: commentText
+        text: commentText,
+        author: 'Jane Doe',
+        timestamp: new Date().toISOString()
     });
+    
+    // Add history event
+    addHistoryEvent(circuitId, 'approved', commentText, 'Jane Doe');
+    
+    // Add notification
+    addNotification('success', `Circuit ${circuitId} approved for decommission`, circuitId);
     
     saveData();
     renderCircuits();
@@ -1345,8 +1407,16 @@ function rejectDecommission(circuitId) {
     circuit.comments.push({
         date: new Date().toLocaleString(),
         decision: 'Keep Active',
-        text: commentText
+        text: commentText,
+        author: 'Jane Doe',
+        timestamp: new Date().toISOString()
     });
+    
+    // Add history event
+    addHistoryEvent(circuitId, 'rejected', commentText, 'Jane Doe');
+    
+    // Add notification
+    addNotification('info', `Circuit ${circuitId} marked to keep active`, circuitId);
     
     saveData();
     renderCircuits();
@@ -1394,7 +1464,7 @@ function renderDecommissionList() {
                         <p style="color: #666666; font-size: 0.95rem;">${circuit.location}</p>
                     </div>
                     <span class="decommission-status ${circuit.decommissionStatus === 'in_process' ? 'in-process' : 'pending'}">
-                        ${circuit.decommissionStatus === 'in_process' ? '🔄 In Process' : '✓ Pending'}
+                        ${circuit.decommissionStatus === 'in_process' ? '<i class="fa-solid fa-arrows-spin"></i> In Process' : '<i class="fa-solid fa-check"></i> Pending'}
                     </span>
                 </div>
                 
@@ -1638,6 +1708,11 @@ function updateAnalytics() {
         document.getElementById('savings-utilization').textContent = '0%';
         document.getElementById('savings-age').textContent = '0';
     }
+    
+    // Update charts if on analytics tab
+    if (document.getElementById('analytics').classList.contains('active')) {
+        updateAnalyticsDashboard();
+    }
 }
 
 // Data Persistence
@@ -1716,4 +1791,1243 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ========== PHASE 1: SEARCH, FILTER, BULK OPERATIONS & EXPORT/IMPORT ==========
+
+// Update filter count display
+function updateFilterCount(filtered, total) {
+    const countElement = document.getElementById('filteredCount');
+    if (countElement) {
+        countElement.textContent = `Showing ${filtered} of ${total} circuits`;
+    }
+}
+
+// Apply filters and search
+function applyFilters() {
+    const searchTerm = document.getElementById('circuitSearch')?.value.toLowerCase() || '';
+    const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+    const utilizationFilter = document.getElementById('utilizationFilter')?.value || 'all';
+    const ageFilter = document.getElementById('ageFilter')?.value || 'all';
+    const serviceTypeFilter = document.getElementById('serviceTypeFilter')?.value || 'all';
+    
+    let filtered = circuits.filter(circuit => {
+        // Search filter
+        const matchesSearch = !searchTerm || 
+            circuit.id.toLowerCase().includes(searchTerm) ||
+            circuit.location.toLowerCase().includes(searchTerm);
+        
+        // Status filter
+        const matchesStatus = statusFilter === 'all' || circuit.status === statusFilter;
+        
+        // Utilization filter
+        let matchesUtilization = true;
+        if (utilizationFilter !== 'all') {
+            const [min, max] = utilizationFilter.split('-').map(Number);
+            if (max) {
+                matchesUtilization = circuit.utilization >= min && circuit.utilization < max;
+            } else {
+                matchesUtilization = circuit.utilization >= min;
+            }
+        }
+        
+        // Age filter
+        let matchesAge = true;
+        if (ageFilter !== 'all') {
+            if (ageFilter === '60+') {
+                matchesAge = circuit.age >= 60;
+            } else {
+                const [min, max] = ageFilter.split('-').map(Number);
+                matchesAge = circuit.age >= min && circuit.age < max;
+            }
+        }
+        
+        // Service type filter
+        const matchesServiceType = serviceTypeFilter === 'all' || circuit.service_type === serviceTypeFilter;
+        
+        return matchesSearch && matchesStatus && matchesUtilization && matchesAge && matchesServiceType;
+    });
+    
+    renderCircuits(filtered);
+    updateSelectionUI();
+}
+
+// Clear all filters
+function clearFilters() {
+    if (document.getElementById('circuitSearch')) document.getElementById('circuitSearch').value = '';
+    if (document.getElementById('statusFilter')) document.getElementById('statusFilter').value = 'all';
+    if (document.getElementById('utilizationFilter')) document.getElementById('utilizationFilter').value = 'all';
+    if (document.getElementById('ageFilter')) document.getElementById('ageFilter').value = 'all';
+    if (document.getElementById('serviceTypeFilter')) document.getElementById('serviceTypeFilter').value = 'all';
+    
+    renderCircuits();
+    updateSelectionUI();
+    showNotification('Filters cleared');
+}
+
+// Toggle individual circuit selection
+function toggleCircuitSelection(circuitId) {
+    const circuit = circuits.find(c => c.id === circuitId);
+    if (circuit) {
+        circuit.selected = !circuit.selected;
+        const card = document.getElementById(`circuit-${circuitId}`);
+        if (card) {
+            card.classList.toggle('selected', circuit.selected);
+        }
+        saveData();
+        updateSelectionUI();
+    }
+}
+
+// Toggle select all circuits
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAllCircuits');
+    const isChecked = selectAllCheckbox.checked;
+    
+    // Apply to filtered circuits only
+    filteredCircuits.forEach(circuit => {
+        circuit.selected = isChecked;
+        const checkbox = document.querySelector(`.circuit-checkbox[data-circuit-id="${circuit.id}"]`);
+        if (checkbox) checkbox.checked = isChecked;
+        const card = document.getElementById(`circuit-${circuit.id}`);
+        if (card) card.classList.toggle('selected', isChecked);
+    });
+    
+    saveData();
+    updateSelectionUI();
+}
+
+// Update selection UI
+function updateSelectionUI() {
+    const selectedCircuits = circuits.filter(c => c.selected);
+    const selectedCount = selectedCircuits.length;
+    
+    const countElement = document.getElementById('selectedCount');
+    const bulkActionButtons = document.getElementById('bulkActionButtons');
+    const selectAllCheckbox = document.getElementById('selectAllCircuits');
+    
+    if (countElement) {
+        countElement.textContent = selectedCount > 0 ? `(${selectedCount} selected)` : '(0 selected)';
+    }
+    
+    if (bulkActionButtons) {
+        bulkActionButtons.style.display = selectedCount > 0 ? 'flex' : 'none';
+    }
+    
+    if (selectAllCheckbox) {
+        const visibleSelected = filteredCircuits.filter(c => c.selected).length;
+        selectAllCheckbox.checked = visibleSelected === filteredCircuits.length && filteredCircuits.length > 0;
+        selectAllCheckbox.indeterminate = visibleSelected > 0 && visibleSelected < filteredCircuits.length;
+    }
+}
+
+// Clear selection
+function clearSelection() {
+    circuits.forEach(circuit => {
+        circuit.selected = false;
+        const checkbox = document.querySelector(`.circuit-checkbox[data-circuit-id="${circuit.id}"]`);
+        if (checkbox) checkbox.checked = false;
+        const card = document.getElementById(`circuit-${circuit.id}`);
+        if (card) card.classList.remove('selected');
+    });
+    
+    saveData();
+    updateSelectionUI();
+    showNotification('Selection cleared');
+}
+
+// Bulk approve circuits
+function bulkApprove() {
+    const selectedCircuits = circuits.filter(c => c.selected && c.status === 'active');
+    
+    if (selectedCircuits.length === 0) {
+        alert('No active circuits selected. Please select circuits that are flagged for review.');
+        return;
+    }
+    
+    const comment = prompt(`Approve ${selectedCircuits.length} circuit(s) for decommission?\n\nEnter approval comment:`);
+    if (!comment) return;
+    
+    showLoading(`Approving ${selectedCircuits.length} circuits...`);
+    
+    selectedCircuits.forEach(circuit => {
+        circuit.status = 'approved';
+        circuit.comments.push({
+            text: comment,
+            author: 'Jane Doe',
+            timestamp: new Date().toISOString(),
+            decision: 'Approved',
+            date: new Date().toLocaleDateString()
+        });
+        circuit.selected = false;
+        
+        // Add history event
+        addHistoryEvent(circuit.id, 'approved', `Bulk approval: ${comment}`, 'Jane Doe');
+    });
+    
+    // Add notification
+    addNotification('success', `${selectedCircuits.length} circuits bulk approved for decommission`, null);
+    
+    saveData();
+    renderCircuits(filteredCircuits);
+    updateStats();
+    updateDecommissionStats();
+    updateAnalytics();
+    renderDecommissionList();
+    updateSelectionUI();
+    
+    setTimeout(() => {
+        hideLoading();
+        showNotification(`${selectedCircuits.length} circuit(s) approved for decommission`);
+    }, 600);
+}
+
+// Bulk reject circuits
+function bulkReject() {
+    const selectedCircuits = circuits.filter(c => c.selected && c.status === 'active');
+    
+    if (selectedCircuits.length === 0) {
+        alert('No active circuits selected. Please select circuits that are flagged for review.');
+        return;
+    }
+    
+    const comment = prompt(`Reject ${selectedCircuits.length} circuit(s) from decommission?\n\nEnter reason for keeping active:`);
+    if (!comment) return;
+    
+    showLoading(`Updating ${selectedCircuits.length} circuits...`);
+    
+    selectedCircuits.forEach(circuit => {
+        circuit.status = 'rejected';
+        circuit.comments.push({
+            text: comment,
+            author: 'Jane Doe',
+            timestamp: new Date().toISOString(),
+            decision: 'Rejected',
+            date: new Date().toLocaleDateString()
+        });
+        circuit.selected = false;
+        
+        // Add history event
+        addHistoryEvent(circuit.id, 'rejected', `Bulk rejection: ${comment}`, 'Jane Doe');
+        
+        updateFeedbackCount();
+    });
+    
+    // Add notification
+    addNotification('info', `${selectedCircuits.length} circuits bulk marked to keep active`, null);
+    
+    saveData();
+    renderCircuits(filteredCircuits);
+    updateStats();
+    updateAnalytics();
+    updateSelectionUI();
+    
+    setTimeout(() => {
+        hideLoading();
+        showNotification(`${selectedCircuits.length} circuit(s) marked to keep active`);
+    }, 600);
+}
+
+// Export circuits to CSV
+function exportCircuits() {
+    const circuitsToExport = filteredCircuits.length > 0 ? filteredCircuits : circuits;
+    
+    if (circuitsToExport.length === 0) {
+        alert('No circuits to export');
+        return;
+    }
+    
+    showLoading('Preparing export...');
+    
+    // CSV headers
+    const headers = [
+        'Circuit ID', 'Location', 'Bandwidth (Mbps)', 'Utilization (%)', 
+        'Age (months)', 'Traffic (GB)', 'Cost/Mbps ($)', 'Contract Status',
+        'Service Type', 'Redundancy', 'Site Status', 'Hardware EOL', 
+        'Provider Status', 'Status', 'Flagged', 'Comments'
+    ];
+    
+    // Convert circuits to CSV rows
+    const rows = circuitsToExport.map(circuit => [
+        circuit.id,
+        circuit.location,
+        circuit.bandwidth,
+        circuit.utilization,
+        circuit.age,
+        circuit.traffic,
+        circuit.cost,
+        circuit.contract_status,
+        circuit.service_type,
+        circuit.redundancy,
+        circuit.site_status,
+        circuit.hardware_eol,
+        circuit.provider_status,
+        circuit.status,
+        circuit.flagged ? 'Yes' : 'No',
+        circuit.comments.map(c => `${c.decision}: ${c.text}`).join('; ')
+    ]);
+    
+    // Create CSV content
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    // Create download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `circuits_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setTimeout(() => {
+        hideLoading();
+        showNotification(`Exported ${circuitsToExport.length} circuits to CSV`);
+    }, 400);
+}
+
+// Import circuits from CSV
+function importCircuits(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    showLoading('Importing circuits...');
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const text = e.target.result;
+            const lines = text.split('\n').filter(line => line.trim());
+            
+            if (lines.length < 2) {
+                alert('CSV file is empty or invalid');
+                return;
+            }
+            
+            // Skip header row
+            const dataLines = lines.slice(1);
+            let importCount = 0;
+            
+            dataLines.forEach(line => {
+                const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                if (!values || values.length < 7) return;
+                
+                // Clean quotes from values
+                const cleanValues = values.map(v => v.replace(/^"|"$/g, ''));
+                
+                const [id, location, bandwidth, utilization, age, traffic, cost] = cleanValues;
+                
+                // Check if circuit already exists
+                if (circuits.find(c => c.id === id)) {
+                    return; // Skip duplicates
+                }
+                
+                circuits.push({
+                    id: id,
+                    location: location,
+                    bandwidth: parseInt(bandwidth) || 0,
+                    utilization: parseInt(utilization) || 0,
+                    age: parseInt(age) || 0,
+                    traffic: parseInt(traffic) || 0,
+                    cost: parseFloat(cost) || 0,
+                    contract_status: cleanValues[7] || 'active',
+                    service_type: cleanValues[8] || 'modern',
+                    redundancy: cleanValues[9] || 'no',
+                    site_status: cleanValues[10] || 'active',
+                    hardware_eol: cleanValues[11] || 'no',
+                    provider_status: cleanValues[12] || 'current',
+                    status: 'active',
+                    flagged: false,
+                    matchedRules: [],
+                    comments: [],
+                    selected: false
+                });
+                importCount++;
+            });
+            
+            if (importCount > 0) {
+                saveData();
+                renderCircuits();
+                updateStats();
+                updateAnalytics();
+                showNotification(`Imported ${importCount} new circuits`);
+            } else {
+                alert('No new circuits to import (all circuits already exist)');
+            }
+            
+        } catch (error) {
+            hideLoading();
+            alert('Error importing CSV file: ' + error.message);
+        }
+        
+        setTimeout(() => {
+            hideLoading();
+        }, 500);
+        
+        // Reset file input
+        event.target.value = '';
+    };
+    
+    reader.readAsText(file);
+}
+
+// ========== PHASE 2: ENHANCED ANALYTICS WITH CHARTS ==========
+
+// Store chart instances globally to destroy before recreating
+let chartInstances = {
+    status: null,
+    utilization: null,
+    age: null,
+    serviceType: null,
+    trend: null,
+    rules: null
+};
+
+// Initialize analytics dashboard with charts
+function updateAnalyticsDashboard() {
+    calculateCostSavings();
+    createStatusChart();
+    createUtilizationChart();
+    createAgeChart();
+    createServiceTypeChart();
+    createTrendChart();
+    createRulesChart();
+}
+
+// Calculate and display cost savings
+function calculateCostSavings() {
+    const approvedCircuits = circuits.filter(c => c.status === 'approved');
+    
+    if (approvedCircuits.length === 0) {
+        document.getElementById('estimatedSavings').textContent = '$0';
+        document.getElementById('savingsBreakdown').textContent = 'No approved circuits yet';
+        return;
+    }
+    
+    // Calculate annual costs (bandwidth * cost * 12 months)
+    const totalAnnualSavings = approvedCircuits.reduce((sum, circuit) => {
+        return sum + (circuit.bandwidth * circuit.cost * 12);
+    }, 0);
+    
+    const avgUtilization = (approvedCircuits.reduce((sum, c) => sum + c.utilization, 0) / approvedCircuits.length).toFixed(1);
+    const avgAge = Math.round(approvedCircuits.reduce((sum, c) => sum + c.age, 0) / approvedCircuits.length);
+    
+    document.getElementById('estimatedSavings').textContent = `$${totalAnnualSavings.toLocaleString()}`;
+    document.getElementById('savingsBreakdown').textContent = 
+        `${approvedCircuits.length} circuits • Avg ${avgUtilization}% utilization • ${avgAge} months old`;
+}
+
+// Create status distribution pie chart
+function createStatusChart() {
+    const canvas = document.getElementById('statusChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Destroy existing chart
+    if (chartInstances.status) {
+        chartInstances.status.destroy();
+    }
+    
+    const statusCounts = {
+        active: circuits.filter(c => c.status === 'active' && !c.flagged).length,
+        flagged: circuits.filter(c => c.flagged).length,
+        approved: circuits.filter(c => c.status === 'approved').length,
+        rejected: circuits.filter(c => c.status === 'rejected').length
+    };
+    
+    chartInstances.status = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Flagged', 'Approved', 'Rejected'],
+            datasets: [{
+                data: [statusCounts.active, statusCounts.flagged, statusCounts.approved, statusCounts.rejected],
+                backgroundColor: [
+                    '#6C757D',
+                    '#FFC107',
+                    '#28A745',
+                    '#DC3545'
+                ],
+                borderWidth: 2,
+                borderColor: '#FFFFFF'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { size: 12 },
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.raw / total) * 100).toFixed(1);
+                            return `${context.label}: ${context.raw} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Create utilization distribution bar chart
+function createUtilizationChart() {
+    const canvas = document.getElementById('utilizationChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    if (chartInstances.utilization) {
+        chartInstances.utilization.destroy();
+    }
+    
+    const ranges = {
+        '0-20%': circuits.filter(c => c.utilization >= 0 && c.utilization < 20).length,
+        '20-40%': circuits.filter(c => c.utilization >= 20 && c.utilization < 40).length,
+        '40-60%': circuits.filter(c => c.utilization >= 40 && c.utilization < 60).length,
+        '60-80%': circuits.filter(c => c.utilization >= 60 && c.utilization < 80).length,
+        '80-100%': circuits.filter(c => c.utilization >= 80 && c.utilization <= 100).length
+    };
+    
+    chartInstances.utilization = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(ranges),
+            datasets: [{
+                label: 'Number of Circuits',
+                data: Object.values(ranges),
+                backgroundColor: '#CD040B',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 5 }
+                }
+            }
+        }
+    });
+}
+
+// Create age distribution bar chart
+function createAgeChart() {
+    const canvas = document.getElementById('ageChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    if (chartInstances.age) {
+        chartInstances.age.destroy();
+    }
+    
+    const ranges = {
+        '0-12 mo': circuits.filter(c => c.age < 12).length,
+        '1-2 yrs': circuits.filter(c => c.age >= 12 && c.age < 24).length,
+        '2-3 yrs': circuits.filter(c => c.age >= 24 && c.age < 36).length,
+        '3-4 yrs': circuits.filter(c => c.age >= 36 && c.age < 48).length,
+        '4-5 yrs': circuits.filter(c => c.age >= 48 && c.age < 60).length,
+        '5+ yrs': circuits.filter(c => c.age >= 60).length
+    };
+    
+    chartInstances.age = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(ranges),
+            datasets: [{
+                label: 'Number of Circuits',
+                data: Object.values(ranges),
+                backgroundColor: '#17A2B8',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 5 }
+                }
+            }
+        }
+    });
+}
+
+// Create service type pie chart
+function createServiceTypeChart() {
+    const canvas = document.getElementById('serviceTypeChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    if (chartInstances.serviceType) {
+        chartInstances.serviceType.destroy();
+    }
+    
+    const legacy = circuits.filter(c => c.service_type === 'legacy').length;
+    const modern = circuits.filter(c => c.service_type === 'modern').length;
+    
+    chartInstances.serviceType = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Legacy', 'Modern'],
+            datasets: [{
+                data: [legacy, modern],
+                backgroundColor: ['#FF6384', '#36A2EB'],
+                borderWidth: 2,
+                borderColor: '#FFFFFF'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { size: 12 },
+                        padding: 15
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Create trend line chart (simulated timeline)
+function createTrendChart() {
+    const canvas = document.getElementById('trendChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    if (chartInstances.trend) {
+        chartInstances.trend.destroy();
+    }
+    
+    // Simulated monthly data for the last 6 months
+    const months = ['6 months ago', '5 months ago', '4 months ago', '3 months ago', '2 months ago', 'Last month'];
+    const flaggedData = [8, 15, 22, 28, 35, circuits.filter(c => c.flagged).length];
+    const approvedData = [3, 7, 12, 16, 21, circuits.filter(c => c.status === 'approved').length];
+    
+    chartInstances.trend = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: 'Flagged Circuits',
+                    data: flaggedData,
+                    borderColor: '#FFC107',
+                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Approved Circuits',
+                    data: approvedData,
+                    borderColor: '#28A745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 10 }
+                }
+            }
+        }
+    });
+}
+
+// Create rules performance horizontal bar chart
+function createRulesChart() {
+    const canvas = document.getElementById('rulesChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    if (chartInstances.rules) {
+        chartInstances.rules.destroy();
+    }
+    
+    // Count how many circuits each rule matched
+    const ruleMatches = {};
+    circuits.forEach(circuit => {
+        if (circuit.matchedRules) {
+            circuit.matchedRules.forEach(ruleName => {
+                ruleMatches[ruleName] = (ruleMatches[ruleName] || 0) + 1;
+            });
+        }
+    });
+    
+    // Get top 5 rules
+    const sortedRules = Object.entries(ruleMatches)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+    
+    if (sortedRules.length === 0) {
+        // No data yet
+        return;
+    }
+    
+    chartInstances.rules = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sortedRules.map(r => r[0]),
+            datasets: [{
+                label: 'Circuits Matched',
+                data: sortedRules.map(r => r[1]),
+                backgroundColor: '#CD040B',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 5 }
+                }
+            }
+        }
+    });
+}
+
+// Refresh analytics
+function refreshAnalytics() {
+    updateAnalytics();
+    updateAnalyticsDashboard();
+    showNotification('Analytics refreshed');
+}
+
+// Export analytics as PDF (HTML-based report)
+function exportAnalyticsPDF() {
+    const report = generateAnalyticsReport();
+    
+    // Create a printable HTML page
+    const printWindow = window.open('', '', 'width=800,height=600');
+    printWindow.document.write(report);
+    printWindow.document.close();
+    
+    setTimeout(() => {
+        printWindow.print();
+    }, 500);
+    
+    showNotification('Analytics report opened for printing/PDF export');
+}
+
+// Generate HTML report
+function generateAnalyticsReport() {
+    const date = new Date().toLocaleDateString();
+    const approvedCircuits = circuits.filter(c => c.status === 'approved');
+    const flaggedCircuits = circuits.filter(c => c.flagged);
+    
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Circuit Decommission Analytics Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 40px; }
+                h1 { color: #CD040B; }
+                h2 { color: #000000; margin-top: 30px; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                th { background-color: #CD040B; color: white; }
+                .metric { display: inline-block; padding: 20px; margin: 10px; background: #f6f6f6; border-radius: 8px; }
+                .metric h3 { margin: 0; font-size: 2rem; color: #CD040B; }
+                .metric p { margin: 5px 0 0 0; color: #666; }
+            </style>
+        </head>
+        <body>
+            <h1>📊 Circuit Decommission Analytics Report</h1>
+            <p><strong>Generated:</strong> ${date}</p>
+            <p><strong>Report Period:</strong> All Time</p>
+            
+            <h2>Key Metrics</h2>
+            <div class="metric">
+                <h3>${circuits.length}</h3>
+                <p>Total Circuits</p>
+            </div>
+            <div class="metric">
+                <h3>${flaggedCircuits.length}</h3>
+                <p>Flagged for Review</p>
+            </div>
+            <div class="metric">
+                <h3>${approvedCircuits.length}</h3>
+                <p>Approved for Decommission</p>
+            </div>
+            
+            <h2>Approved Circuits for Decommission</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Circuit ID</th>
+                        <th>Location</th>
+                        <th>Utilization</th>
+                        <th>Age (months)</th>
+                        <th>Bandwidth (Mbps)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${approvedCircuits.map(c => `
+                        <tr>
+                            <td>${c.id}</td>
+                            <td>${c.location}</td>
+                            <td>${c.utilization}%</td>
+                            <td>${c.age}</td>
+                            <td>${c.bandwidth}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            
+            <h2>Active Rules</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rule Name</th>
+                        <th>Type</th>
+                        <th>Condition</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rules.map(r => `
+                        <tr>
+                            <td>${r.name}</td>
+                            <td>${r.type === 'include' ? 'Include' : 'Exclude'}</td>
+                            <td>${r.conditions ? 'Compound Rule' : getConditionLabel(r.condition) + ' ' + r.operator + ' ' + r.value}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            
+            <p style="margin-top: 40px; color: #666; font-size: 0.9rem;">
+                <strong>Disclaimer:</strong> This report is generated by an AI-powered system. 
+                All recommendations should be reviewed by qualified network engineers before implementation.
+            </p>
+        </body>
+        </html>
+    `;
+}
+
+// ========== PHASE 3: HISTORY/AUDIT TRAIL + SMART NOTIFICATIONS ==========
+
+// Notification System
+let notifications = [];
+let notificationIdCounter = 1;
+
+// Initialize notification system
+function initializeNotificationSystem() {
+    // Load saved notifications
+    const savedNotifications = localStorage.getItem('telecom_notifications');
+    if (savedNotifications) {
+        notifications = JSON.parse(savedNotifications);
+        notificationIdCounter = Math.max(...notifications.map(n => n.id), 0) + 1;
+    }
+    
+    updateNotificationBadge();
+    renderNotifications();
+    
+    // Generate smart notifications on load
+    generateSmartNotifications();
+}
+
+// Toggle notification panel
+function toggleNotificationPanel() {
+    const panel = document.getElementById('notificationPanel');
+    const isActive = panel.classList.toggle('active');
+    
+    if (isActive) {
+        renderNotifications();
+    }
+    
+    // Close panel when clicking outside
+    if (isActive) {
+        setTimeout(() => {
+            document.addEventListener('click', closeNotificationPanelOutside);
+        }, 0);
+    } else {
+        document.removeEventListener('click', closeNotificationPanelOutside);
+    }
+}
+
+function closeNotificationPanelOutside(event) {
+    const panel = document.getElementById('notificationPanel');
+    const bell = document.querySelector('.notification-bell');
+    
+    if (!panel.contains(event.target) && !bell.contains(event.target)) {
+        panel.classList.remove('active');
+        document.removeEventListener('click', closeNotificationPanelOutside);
+    }
+}
+
+// Add notification
+function addNotification(type, message, circuitId = null) {
+    const notification = {
+        id: notificationIdCounter++,
+        type: type, // 'info', 'warning', 'success', 'alert'
+        message: message,
+        circuitId: circuitId,
+        timestamp: new Date().toISOString(),
+        read: false
+    };
+    
+    notifications.unshift(notification);
+    
+    // Keep only last 50 notifications
+    if (notifications.length > 50) {
+        notifications = notifications.slice(0, 50);
+    }
+    
+    saveNotifications();
+    updateNotificationBadge();
+    renderNotifications();
+}
+
+// Mark notification as read
+function markAsRead(notificationId) {
+    const notification = notifications.find(n => n.id === notificationId);
+    if (notification) {
+        notification.read = true;
+        saveNotifications();
+        updateNotificationBadge();
+        renderNotifications();
+    }
+}
+
+// Mark all as read
+function markAllAsRead() {
+    notifications.forEach(n => n.read = true);
+    saveNotifications();
+    updateNotificationBadge();
+    renderNotifications();
+}
+
+// Clear all notifications
+function clearAllNotifications() {
+    if (confirm('Are you sure you want to clear all notifications?')) {
+        notifications = [];
+        saveNotifications();
+        updateNotificationBadge();
+        renderNotifications();
+    }
+}
+
+// Update notification badge
+function updateNotificationBadge() {
+    const unreadCount = notifications.filter(n => !n.read).length;
+    const badge = document.getElementById('notificationBadge');
+    
+    if (unreadCount > 0) {
+        badge.textContent = unreadCount;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// Render notifications
+function renderNotifications() {
+    const listElement = document.getElementById('notificationList');
+    
+    if (notifications.length === 0) {
+        listElement.innerHTML = '<div class="empty-state">No notifications</div>';
+        return;
+    }
+    
+    listElement.innerHTML = notifications.map(notification => {
+        const timeAgo = getTimeAgo(new Date(notification.timestamp));
+        return `
+            <div class="notification-item ${notification.read ? '' : 'unread'}" 
+                 onclick="handleNotificationClick(${notification.id})">
+                <span class="notification-type ${notification.type}">${notification.type.toUpperCase()}</span>
+                <div class="notification-message">${notification.message}</div>
+                <div class="notification-time">${timeAgo}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Handle notification click
+function handleNotificationClick(notificationId) {
+    const notification = notifications.find(n => n.id === notificationId);
+    if (!notification) return;
+    
+    markAsRead(notificationId);
+    
+    // If notification has a circuit ID, navigate to circuit review
+    if (notification.circuitId) {
+        document.querySelector('[data-tab="circuitReview"]').click();
+        // Scroll to circuit (simplified)
+        setTimeout(() => {
+            const circuitElement = document.querySelector(`[data-circuit-id="${notification.circuitId}"]`);
+            if (circuitElement) {
+                circuitElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 300);
+    }
+}
+
+// Generate smart notifications
+function generateSmartNotifications() {
+    const flaggedCircuits = circuits.filter(c => c.flagged && c.status === 'active');
+    const pendingReviewCount = flaggedCircuits.length;
+    
+    // Notification: Circuits awaiting review
+    if (pendingReviewCount > 0) {
+        const existingNotification = notifications.find(n => 
+            n.message.includes('circuits pending review') && !n.read
+        );
+        if (!existingNotification) {
+            addNotification('warning', 
+                `${pendingReviewCount} circuits pending review`, 
+                null
+            );
+        }
+    }
+    
+    // Notification: Rules with no matches
+    const ruleMatches = {};
+    circuits.forEach(circuit => {
+        if (circuit.matchedRules) {
+            circuit.matchedRules.forEach(ruleName => {
+                ruleMatches[ruleName] = true;
+            });
+        }
+    });
+    
+    const unusedRules = rules.filter(r => !ruleMatches[r.name]);
+    if (unusedRules.length > 0) {
+        unusedRules.forEach(rule => {
+            const existingNotification = notifications.find(n => 
+                n.message.includes(`Rule "${rule.name}" hasn't matched`) && !n.read
+            );
+            if (!existingNotification) {
+                addNotification('info', 
+                    `Rule "${rule.name}" hasn't matched any circuits yet`, 
+                    null
+                );
+            }
+        });
+    }
+    
+    // Notification: High utilization circuits flagged
+    const highUtilCircuits = circuits.filter(c => c.flagged && c.utilization > 80);
+    if (highUtilCircuits.length > 0) {
+        highUtilCircuits.forEach(circuit => {
+            const existingNotification = notifications.find(n => 
+                n.message.includes(circuit.id) && n.message.includes('high utilization') && !n.read
+            );
+            if (!existingNotification) {
+                addNotification('alert', 
+                    `Circuit ${circuit.id} flagged despite ${circuit.utilization}% utilization - review urgently`, 
+                    circuit.id
+                );
+            }
+        });
+    }
+}
+
+// Save notifications
+function saveNotifications() {
+    localStorage.setItem('telecom_notifications', JSON.stringify(notifications));
+}
+
+// Get time ago helper
+function getTimeAgo(date) {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+    return date.toLocaleDateString();
+}
+
+// Circuit History System
+function initializeCircuitHistory() {
+    // Add creation timestamp to existing circuits if not present
+    circuits.forEach(circuit => {
+        if (!circuit.history) {
+            circuit.history = [];
+            
+            // Add creation event
+            circuit.history.push({
+                event: 'created',
+                timestamp: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(), // Random date in last 90 days
+                author: 'System',
+                description: 'Circuit added to system'
+            });
+            
+            // If circuit is flagged, add flagged event
+            if (circuit.flagged && circuit.matchedRules) {
+                circuit.history.push({
+                    event: 'flagged',
+                    timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(), // Random date in last 30 days
+                    author: 'Rules Engine',
+                    description: `Flagged by rules: ${circuit.matchedRules.join(', ')}`
+                });
+            }
+            
+            // If circuit has comments, add review events
+            if (circuit.comments && circuit.comments.length > 0) {
+                circuit.comments.forEach(comment => {
+                    circuit.history.push({
+                        event: circuit.status === 'approved' ? 'approved' : 'rejected',
+                        timestamp: comment.timestamp,
+                        author: comment.author,
+                        description: comment.text
+                    });
+                });
+            }
+        }
+    });
+    
+    saveData();
+}
+
+// Add history event
+function addHistoryEvent(circuitId, event, description, author = 'Jane Doe') {
+    const circuit = circuits.find(c => c.id === circuitId);
+    if (!circuit) return;
+    
+    if (!circuit.history) {
+        circuit.history = [];
+    }
+    
+    circuit.history.push({
+        event: event, // 'created', 'flagged', 'approved', 'rejected', 'comment', 'status_change'
+        timestamp: new Date().toISOString(),
+        author: author,
+        description: description
+    });
+    
+    saveData();
+}
+
+// Open history modal
+function viewCircuitHistory(circuitId) {
+    const circuit = circuits.find(c => c.id === circuitId);
+    if (!circuit) return;
+    
+    const modal = document.getElementById('historyModal');
+    const circuitInfo = document.getElementById('historyCircuitInfo');
+    const timeline = document.getElementById('historyTimeline');
+    
+    // Populate circuit info
+    circuitInfo.innerHTML = `
+        <h3>Circuit ${circuit.id}</h3>
+        <div class="history-info-grid">
+            <div class="history-info-item">
+                <span class="history-info-label">Location:</span>
+                <span class="history-info-value">${circuit.location}</span>
+            </div>
+            <div class="history-info-item">
+                <span class="history-info-label">Status:</span>
+                <span class="history-info-value">${circuit.status || 'active'}</span>
+            </div>
+            <div class="history-info-item">
+                <span class="history-info-label">Utilization:</span>
+                <span class="history-info-value">${circuit.utilization}%</span>
+            </div>
+            <div class="history-info-item">
+                <span class="history-info-label">Age:</span>
+                <span class="history-info-value">${circuit.age} months</span>
+            </div>
+            <div class="history-info-item">
+                <span class="history-info-label">Bandwidth:</span>
+                <span class="history-info-value">${circuit.bandwidth} Mbps</span>
+            </div>
+            <div class="history-info-item">
+                <span class="history-info-label">Service Type:</span>
+                <span class="history-info-value">${circuit.service_type}</span>
+            </div>
+        </div>
+    `;
+    
+    // Populate timeline (sort by timestamp, newest first)
+    const sortedHistory = (circuit.history || []).sort((a, b) => 
+        new Date(b.timestamp) - new Date(a.timestamp)
+    );
+    
+    if (sortedHistory.length === 0) {
+        timeline.innerHTML = '<div class="empty-state">No history available</div>';
+    } else {
+        timeline.innerHTML = sortedHistory.map(event => {
+            const eventDate = new Date(event.timestamp);
+            const formattedDate = eventDate.toLocaleString();
+            
+            return `
+                <div class="history-event ${event.event}">
+                    <div class="history-event-header">
+                        <span class="history-event-title">${getEventTitle(event.event)}</span>
+                        <span class="history-event-time">${formattedDate}</span>
+                    </div>
+                    <div class="history-event-description">${event.description}</div>
+                    <div class="history-event-author">By: ${event.author}</div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    modal.classList.add('active');
+}
+
+// Close history modal
+function closeHistoryModal() {
+    document.getElementById('historyModal').classList.remove('active');
+}
+
+// Get event title helper
+function getEventTitle(event) {
+    const titles = {
+        'created': '<i class="fa-solid fa-plus"></i> Circuit Created',
+        'flagged': '<i class="fa-solid fa-flag"></i> Flagged for Review',
+        'approved': '<i class="fa-solid fa-circle-check"></i> Approved for Decommission',
+        'rejected': '<i class="fa-solid fa-ban"></i> Kept Active',
+        'comment': '<i class="fa-solid fa-comment"></i> Comment Added',
+        'status_change': '<i class="fa-solid fa-arrow-right-arrow-left"></i> Status Changed'
+    };
+    return titles[event] || event;
+}
 
