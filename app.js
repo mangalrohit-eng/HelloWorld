@@ -96,19 +96,140 @@ function initializeTabs() {
 // Rule Form Handling
 function initializeRuleForm() {
     const form = document.getElementById('ruleForm');
+    const conditionSelect = document.getElementById('ruleCondition');
+    const operatorSelect = document.getElementById('ruleOperator');
+    const valueInputGroup = document.getElementById('valueInputGroup');
+    
+    // Define condition types and their options
+    const conditionConfig = {
+        // Numeric conditions
+        'utilization': { type: 'numeric', operators: ['<', '<=', '>', '>=', '==', '!='] },
+        'bandwidth': { type: 'numeric', operators: ['<', '<=', '>', '>=', '==', '!='] },
+        'age': { type: 'numeric', operators: ['<', '<=', '>', '>=', '==', '!='] },
+        'traffic': { type: 'numeric', operators: ['<', '<=', '>', '>=', '==', '!='] },
+        'cost': { type: 'numeric', operators: ['<', '<=', '>', '>=', '==', '!='] },
+        // Text-based conditions
+        'contract_status': { 
+            type: 'select', 
+            operators: ['==', '!='],
+            options: [
+                { value: 'active', label: 'Active' },
+                { value: 'expired', label: 'Expired' },
+                { value: 'expiring_soon', label: 'Expiring Soon' }
+            ]
+        },
+        'service_type': { 
+            type: 'select', 
+            operators: ['==', '!='],
+            options: [
+                { value: 'legacy', label: 'Legacy' },
+                { value: 'modern', label: 'Modern' }
+            ]
+        },
+        'redundancy': { 
+            type: 'select', 
+            operators: ['==', '!='],
+            options: [
+                { value: 'yes', label: 'Yes' },
+                { value: 'no', label: 'No' }
+            ]
+        },
+        'site_status': { 
+            type: 'select', 
+            operators: ['==', '!='],
+            options: [
+                { value: 'active', label: 'Active' },
+                { value: 'closed', label: 'Closed' },
+                { value: 'relocated', label: 'Relocated' },
+                { value: 'consolidated', label: 'Consolidated' }
+            ]
+        },
+        'hardware_eol': { 
+            type: 'select', 
+            operators: ['==', '!='],
+            options: [
+                { value: 'yes', label: 'Yes (End of Life)' },
+                { value: 'no', label: 'No (Supported)' }
+            ]
+        },
+        'provider_status': { 
+            type: 'select', 
+            operators: ['==', '!='],
+            options: [
+                { value: 'current', label: 'Current Provider' },
+                { value: 'migrated', label: 'Migrated' },
+                { value: 'pending_migration', label: 'Pending Migration' }
+            ]
+        }
+    };
+    
+    // Handle condition change
+    conditionSelect.addEventListener('change', function() {
+        const condition = this.value;
+        const config = conditionConfig[condition];
+        
+        if (!config) return;
+        
+        // Update operators
+        operatorSelect.innerHTML = '';
+        const operatorLabels = {
+            '<': 'Less than',
+            '<=': 'Less than or equal',
+            '>': 'Greater than',
+            '>=': 'Greater than or equal',
+            '==': 'Equal to',
+            '!=': 'Not equal to'
+        };
+        
+        config.operators.forEach(op => {
+            const option = document.createElement('option');
+            option.value = op;
+            option.textContent = operatorLabels[op];
+            operatorSelect.appendChild(option);
+        });
+        
+        // Update value input
+        if (config.type === 'numeric') {
+            valueInputGroup.innerHTML = `
+                <label for="ruleValue">Threshold Value *</label>
+                <input type="number" id="ruleValue" required placeholder="e.g., 20">
+            `;
+        } else if (config.type === 'select') {
+            const optionsHTML = config.options.map(opt => 
+                `<option value="${opt.value}">${opt.label}</option>`
+            ).join('');
+            valueInputGroup.innerHTML = `
+                <label for="ruleValue">Select Value *</label>
+                <select id="ruleValue" required>
+                    ${optionsHTML}
+                </select>
+            `;
+        }
+    });
     
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
         const ruleType = document.querySelector('input[name="ruleType"]:checked').value;
+        const condition = document.getElementById('ruleCondition').value;
+        const config = conditionConfig[condition];
+        const valueElement = document.getElementById('ruleValue');
+        
+        // Get value based on type
+        let value;
+        if (config && config.type === 'select') {
+            value = valueElement.value; // String value
+        } else {
+            value = parseFloat(valueElement.value); // Numeric value
+        }
         
         const rule = {
             id: Date.now(),
             name: document.getElementById('ruleName').value,
             type: ruleType, // 'include' or 'exclude'
-            condition: document.getElementById('ruleCondition').value,
+            condition: condition,
             operator: document.getElementById('ruleOperator').value,
-            value: parseFloat(document.getElementById('ruleValue').value),
+            value: value,
             description: document.getElementById('ruleDescription').value
         };
         
@@ -117,6 +238,21 @@ function initializeRuleForm() {
         renderRules();
         updateAnalytics();
         form.reset();
+        
+        // Reset to default operators after form reset
+        operatorSelect.innerHTML = `
+            <option value="<">Less than</option>
+            <option value="<=">Less than or equal</option>
+            <option value=">">Greater than</option>
+            <option value=">=">Greater than or equal</option>
+            <option value="==">Equal to</option>
+            <option value="!=">Not equal to</option>
+        `;
+        
+        valueInputGroup.innerHTML = `
+            <label for="ruleValue">Threshold Value *</label>
+            <input type="number" id="ruleValue" required placeholder="e.g., 20">
+        `;
         
         showNotification('Rule added successfully!');
     });
