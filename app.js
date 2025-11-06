@@ -66,6 +66,28 @@ function createDefaultRules() {
                 operator: '<',
                 value: 10,
                 description: 'Critical: Circuits under 10% utilization are strong candidates for immediate decommission'
+            },
+            {
+                id: Date.now() + 6,
+                name: 'Old Legacy Circuits',
+                type: 'include',
+                conditions: [
+                    { condition: 'age', operator: '>', value: 48 },
+                    { condition: 'service_type', operator: '==', value: 'legacy' }
+                ],
+                logic: 'AND',
+                description: 'Complex Rule: Legacy circuits older than 4 years are prime candidates for technology refresh and decommission'
+            },
+            {
+                id: Date.now() + 7,
+                name: 'Infrastructure or Hardware Issues',
+                type: 'include',
+                conditions: [
+                    { condition: 'site_status', operator: '==', value: 'closed' },
+                    { condition: 'hardware_eol', operator: '==', value: 'yes' }
+                ],
+                logic: 'OR',
+                description: 'Complex Rule: Circuits at closed sites or with end-of-life hardware should be decommissioned'
             }
         ];
         
