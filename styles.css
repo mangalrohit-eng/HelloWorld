@@ -1000,6 +1000,22 @@ textarea {
 }
 
 /* Cost Savings Card */
+.cost-savings-highlight {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.cost-savings-highlight .savings-icon {
+    color: #ffffff;
+}
+
+.cost-savings-highlight .savings-content h3,
+.cost-savings-highlight .savings-content p,
+.cost-savings-highlight .savings-content small {
+    color: #ffffff !important;
+}
+
 .cost-savings-card {
     display: flex;
     align-items: center;
