@@ -1937,7 +1937,14 @@ function applyFilters() {
             circuit.location.toLowerCase().includes(searchTerm);
         
         // Status filter
-        const matchesStatus = statusFilter === 'all' || circuit.status === statusFilter;
+        let matchesStatus = false;
+        if (statusFilter === 'all') {
+            matchesStatus = true;
+        } else if (statusFilter === 'flagged') {
+            matchesStatus = circuit.flagged === true && circuit.status === 'active';
+        } else {
+            matchesStatus = circuit.status === statusFilter;
+        }
         
         // Utilization filter
         let matchesUtilization = true;
