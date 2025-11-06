@@ -235,8 +235,32 @@ function generateSampleCircuits() {
         const traffic = Math.floor(bandwidth * trafficPercent * 0.9); // Traffic in GB
         const cost = (Math.random() * 20 + 5).toFixed(2); // $5-$25 per Mbps
         
+        const circuitId = `CKT-2024-${String(i).padStart(3, '0')}`;
+        const comments = [];
+        let status = 'active';
+        
+        // Mark 5 specific circuits as rejected with 911 traffic reason
+        if ([1, 3, 5, 7, 9].includes(i)) {
+            status = 'rejected';
+            comments.push({
+                text: 'Keep active - this circuit carries 911 emergency traffic and cannot be decommissioned',
+                author: 'Network Engineer',
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        // Mark all circuits ending with 2 as rejected
+        if (circuitId.endsWith('2')) {
+            status = 'rejected';
+            comments.push({
+                text: 'Keep active - all circuits ending with 2 are part of critical infrastructure and cannot be decommissioned per company policy',
+                author: 'Network Engineer',
+                timestamp: new Date().toISOString()
+            });
+        }
+        
         circuits.push({
-            id: `CKT-2024-${String(i).padStart(3, '0')}`,
+            id: circuitId,
             location: cities[i - 1] || `Location ${i}`,
             bandwidth: bandwidth,
             utilization: utilization,
@@ -249,8 +273,8 @@ function generateSampleCircuits() {
             site_status: siteStatuses[Math.floor(Math.random() * siteStatuses.length)],
             hardware_eol: hardwareEolStatuses[Math.floor(Math.random() * hardwareEolStatuses.length)],
             provider_status: providerStatuses[Math.floor(Math.random() * providerStatuses.length)],
-            status: 'active',
-            comments: []
+            status: status,
+            comments: comments
         });
     }
     
