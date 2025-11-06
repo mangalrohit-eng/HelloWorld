@@ -931,14 +931,17 @@ function renderDecommissionList() {
 
 // Send for Decommission
 function sendForDecommission() {
+    console.log('sendForDecommission called');
     const checkboxes = document.querySelectorAll('#decommissionList input[type="checkbox"]:checked');
+    console.log('Selected checkboxes:', checkboxes.length);
     
     if (checkboxes.length === 0) {
-        alert('Please select at least one circuit to send for decommission.');
+        alert('Please select at least one circuit to send for decommission. Make sure you have approved some circuits in the Circuit Review tab first.');
         return;
     }
     
     const circuitIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-circuit-id'));
+    console.log('Circuit IDs:', circuitIds);
     
     // Start decommission workflow using footer bar
     startDecommissionWorkflow(circuitIds);
