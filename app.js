@@ -1,3 +1,77 @@
+// Password Protection
+const CORRECT_PASSWORD = "Accenture2025";
+
+// Check if already authenticated in this session
+function checkAuthentication() {
+    const isAuthenticated = sessionStorage.getItem('authenticated');
+    if (isAuthenticated === 'true') {
+        hidePasswordOverlay();
+    } else {
+        showPasswordOverlay();
+    }
+}
+
+function showPasswordOverlay() {
+    const overlay = document.getElementById('passwordProtectionOverlay');
+    if (overlay) {
+        overlay.classList.remove('hidden');
+        // Focus on password input
+        setTimeout(() => {
+            const passwordInput = document.getElementById('passwordInput');
+            if (passwordInput) {
+                passwordInput.focus();
+            }
+        }, 100);
+    }
+}
+
+function hidePasswordOverlay() {
+    const overlay = document.getElementById('passwordProtectionOverlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+    }
+}
+
+function checkPassword(event) {
+    event.preventDefault();
+    
+    const passwordInput = document.getElementById('passwordInput');
+    const passwordError = document.getElementById('passwordError');
+    const enteredPassword = passwordInput.value;
+    
+    if (enteredPassword === CORRECT_PASSWORD) {
+        // Correct password - grant access
+        sessionStorage.setItem('authenticated', 'true');
+        
+        // Add success animation
+        passwordInput.style.borderColor = '#28a745';
+        passwordInput.style.background = '#f0fff4';
+        
+        // Hide overlay with delay for visual feedback
+        setTimeout(() => {
+            hidePasswordOverlay();
+        }, 300);
+    } else {
+        // Incorrect password - show error
+        passwordInput.classList.add('error');
+        passwordError.style.display = 'block';
+        passwordInput.value = '';
+        passwordInput.focus();
+        
+        // Remove error styling after animation
+        setTimeout(() => {
+            passwordInput.classList.remove('error');
+        }, 400);
+    }
+    
+    return false;
+}
+
+// Check authentication on page load
+window.addEventListener('DOMContentLoaded', function() {
+    checkAuthentication();
+});
+
 // Application State
 let rules = [];
 let circuits = [];
